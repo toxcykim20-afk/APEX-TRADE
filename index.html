@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ApexTrader - Deriv Style</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+// LOGIN - THIS IS AT TOP SO IT ALWAYS WORKS
+function toLogin(){
+  var n=document.getElementById('loginName').value;
+  var e=document.getElementById('loginEmail').value;
+  if(!n || n.length<2){alert('Enter full name');return;}
+  localStorage.setItem('apex_name',n);
+  localStorage.setItem('apex_email',e);
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('moreName').innerText=n;
+  document.getElementById('moreEmail').innerText=e||'guest@example.com';
+  document.getElementById('chatName').innerText=n;
+  var pn=document.getElementById('profName'); if(pn) pn.value=n;
+  var pe=document.getElementById('profEmail'); if(pe) pe.value=e;
+  showPhase('market');
+}
+function logout(){localStorage.clear();location.reload();}
+function showPhase(p){
+  document.querySelectorAll('.phase').forEach(function(el){el.classList.add('hidden');});
+  var target=document.getElementById('phase-'+p);
+  if(target) target.classList.remove('hidden');
+  document.getElementById('header-market').style.display = (p==='market')?'flex':'none';
+  var isMorePage=['calendar','trading','profile','settings','chat','legal'].includes(p);
+  document.getElementById('header-title').style.display = isMorePage?'flex':'none';
+  if(isMorePage) document.getElementById('headerTitleText').innerText=p;
+  document.querySelectorAll('[id^=btn-]').forEach(function(b){b.classList.remove('text-[#22c55e]'); b.classList.add('opacity-60');});
+  var main=isMorePage?'more':p;
+  var btn=document.getElementById('btn-'+main);
+  if(btn){btn.classList.add('text-[#22c55e]'); btn.classList.remove('opacity-60');}
+}
+function openMore(p){showPhase(p);}
+function showToast(m){var t=document.getElementById('toast');t.innerText=m;t.classList.remove('hidden');setTimeout(function(){t.classList.add('hidden');},2000);}
+</script>
+</head>
+<body class="bg-black text-white">
+<div class="max-w-[430px] mx-auto min-h-screen flex flex-col bg-black relative">
+
+<!-- LOGIN -->
+<div id="loginScreen" style="position:fixed;inset:0;background:black;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
+<div style="width:80px;height:80px;background:#111;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:12px">₿↗</div>
+<b style="font-size:22px;letter-spacing:3px">APEXTRADER</b>
+<p style="font-size:10px;opacity:0.5;margin-bottom:20px;text-align:center">DEMO SIMULATOR ONLY - NO REAL MONEY<br>Min KSh 500 - 95% Payout</p>
+<input id="loginName" placeholder="Full Name e.g Amos Kimungetich" style="width:100%;background:#111;border:1px solid rgba(255,255,255,0.1);padding:14px;border-radius:12px;color:white;margin-bottom:10px">
+<input id="loginEmail" placeholder="Email" style="width:100%;background:#111;border:1px solid rgba(255,255,255,0.1);padding:14px;border-radius:12px;color:white;margin-bottom:16px">
+<button type="button" onclick="toLogin()" style="width:100%;background:white;color:black;padding:14px;border-radius:12px;font-weight:900">LOGIN →</button>
+</div>
+
+<!-- HEADERS -->
+<div id="header-market" class="flex justify-between items-center p-4 bg-black"><b>Popular ▼</b><span>🔍</span></div>
+<div id="header-title" class="hidden p-4 bg-black items-center gap-3"><button onclick="showPhase('more')" class="text-xl">←</button><b id="headerTitleText" class="capitalize">More</b></div>
+
+<!-- MARKET -->
+<div id="phase-market" class="phase flex-1 overflow-auto"><div id="marketList" class="px-3"></div></div>
+
+<!-- TRADE -->
+<div id="phase-trade" class="phase hidden flex-1 flex flex-col">
+<div class="p-3 flex justify-between bg-[#111]"><button onclick="showPhase('market')">← Back</button><b id="tradeSymbol">XAUUSD</b><span class="text-[10px] bg-[#22c55e] text-black px-2 py-1 rounded font-bold">95%</span></div>
+<div id="chart" class="w-full h-[320px] bg-black"></div>
+<div class="p-3">
+<div class="grid grid-cols-2 gap-2"><input id="stake" value="50" type="number" class="w-full bg-[#111] border border-white/10 p-3 rounded-lg text-center font-bold"><div class="bg-[#111] p-3 rounded-lg text-center text-[#22c55e] font-black">KSh <span id="payoutVal">47.5</span></div></div>
+<div class="flex gap-2 mt-3"><button onclick="doTrade('BUY')" class="bg-[#22c55e] w-1/2 py-4 rounded-xl font-black text-black">▲ BUY</button><button onclick="doTrade('SELL')" class="bg-[#ef4444] w-1/2 py-4 rounded-xl font-black">▼ SELL</button></div>
+<p id="status" class="text-center text-[12px] mt-2 h-5 font-bold"></p>
+</div></div>
+
+<!-- POSITIONS -->
+<div id="phase-positions" class="phase hidden flex-1 bg-black flex flex-col items-center justify-center text-center px-6"><b class="opacity-70">No open positions</b><div id="hist" class="text-[11px] mt-3 w-full"></div><button onclick="showPhase('market')" class="text-[#2e7cf6] mt-3 text-[13px]">Go to Trade</button></div>
+
+<!-- FUNDS -->
+<div id="phase-funds" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold text-[18px] mb-4">Funds</h2><div class="bg-[#111] rounded-xl p-4"><div class="flex gap-2 mb-4"><button onclick="switchAcc('demo')" id="demoBtn" class="flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]">DEMO</button><button onclick="switchAcc('real')" id="realBtn" class="flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]">REAL</button></div><b id="balAcc" class="text-[28px]">KSh 1,000.00</b><div id="realActions" class="hidden mt-4"><div class="grid grid-cols-2 gap-2"><button onclick="openModal('deposit')" class="bg-white text-black py-3 rounded-xl font-black text-[12px]">Deposit</button><button onclick="openModal('withdraw')" class="bg-[#222] py-3 rounded-xl text-[12px]">Withdraw</button></div><p class="text-[10px] opacity-50 mt-2">Min KSh 500 via M-Pesa (Demo only)</p></div></div></div>
+
+<!-- MORE -->
+<div id="phase-more" class="phase hidden flex-1 bg-black p-4 overflow-auto">
+<div class="text-center mt-2 mb-6"><b id="moreName" class="text-[20px] block">Guest</b><div id="moreEmail" class="text-[12px] opacity-50">guest@example.com</div><div class="inline-block bg-[#0a2342] text-[#3b82f6] text-[10px] px-3 py-1 rounded-full mt-2 font-bold">Verified</div></div>
+<div class="space-y-3">
+<button onclick="openMore('calendar')" class="w-full bg-[#0a84ff] rounded-xl p-4 flex justify-between items-center"><b>📅 Economic Calendar</b><span>›</span></button>
+<button onclick="openMore('trading')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>∞ Trading account</b><span>›</span></button>
+<button onclick="openMore('profile')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>👤 Profile & Security</b><span>›</span></button>
+<button onclick="openMore('settings')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>⚙️ App settings</b><span>›</span></button>
+<button onclick="openMore('chat')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>🎧 Live Chat</b><span>›</span></button>
+<button onclick="openMore('legal')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>📄 Legal</b><span>›</span></button>
+<button onclick="logout()" class="w-full bg-[#151515] rounded-xl p-4 text-center opacity-60">Logout</button>
+</div><div class="text-center text-[10px] opacity-20 mt-6">v2.34.2 - DEMO ONLY</div>
+</div>
+
+<div id="phase-calendar" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold mb-4">📅 Economic Calendar</h2><div class="bg-[#111] p-3 rounded-xl mb-2 flex justify-between"><div><b>USD - NFP</b><div class="text-[10px] opacity-50">Today 3:30 PM</div></div><span class="text-[#ef4444] font-bold">High</span></div><div class="bg-[#111] p-3 rounded-xl"><b>Tip:</b><p class="text-[11px] opacity-60 mt-1">High news = volatility. Good for 0.7s trades on XAUUSD.</p></div></div>
+<div id="phase-trading" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold mb-4">Trading account</h2><div class="bg-[#111] p-4 rounded-xl"><div class="text-[12px] mb-2">Payout: <b class="text-[#22c55e]">95%</b></div><div class="text-[12px] mb-2">Speed: <b>0.7s</b></div><button onclick="showToast('Settings saved!')" class="w-full bg-white text-black py-3 rounded-xl font-black mt-3">Save Settings</button></div></div>
+<div id="phase-profile" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold mb-4">Profile</h2><div class="bg-[#111] p-4 rounded-xl space-y-3"><input id="profName" class="w-full bg-black border border-white/10 p-3 rounded-xl"><input id="profEmail" class="w-full bg-black border border-white/10 p-3 rounded-xl"><input placeholder="07xx xxx xxx M-Pesa" class="w-full bg-black border border-white/10 p-3 rounded-xl"><button onclick="saveProfile()" class="w-full bg-white text-black py-3 rounded-xl font-black">Update Profile</button></div></div>
+<div id="phase-settings" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold mb-4">Settings</h2><div class="bg-[#111] p-4 rounded-xl">Dark Mode: ON<br>Sound: ON<br>Language: English</div></div>
+<div id="phase-chat" class="phase hidden flex-1 bg-black p-4 flex flex-col"><h2 class="font-bold mb-4">Live Chat 24/7</h2><div id="chatBox" class="flex-1 bg-[#111] rounded-xl p-3 space-y-2 overflow-auto h-[300px] text-[12px]"><div class="bg-[#222] p-2 rounded-lg w-fit">Hi <span id="chatName">there</span>! Min KSh 500, 95% payout 🚀</div></div><div class="flex gap-2 mt-3"><input id="chatInput" placeholder="Type message..." class="flex-1 bg-[#111] border border-white/10 p-3 rounded-xl text-[12px]"><button onclick="sendChat()" class="bg-[#0a84ff] px-5 rounded-xl font-bold">Send</button></div></div>
+<div id="phase-legal" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold mb-4">Legal</h2><div class="bg-[#111] p-4 rounded-xl text-[11px] opacity-70">DEMO SIMULATOR FOR EDUCATIONAL PURPOSES ONLY - NO REAL MONEY - NOT AFFILIATED WITH DERIV. Trading involves risk. 18+ only. Binary options 95% payout is simulated.</div></div>
+
+<!-- BOTTOM NAV -->
+<div class="grid grid-cols-4 bg-black border-t border-white/10 text-[11px] py-2"><button onclick="showPhase('market')" id="btn-market" class="flex flex-col items-center text-[#22c55e]"><span>📈</span>Trade</button><button onclick="showPhase('positions')" id="btn-positions" class="flex flex-col items-center opacity-60"><span>📋</span>Positions</button><button onclick="showPhase('funds')" id="btn-funds" class="flex flex-col items-center opacity-60"><span>💰</span>Funds</button><button onclick="showPhase('more')" id="btn-more" class="flex flex-col items-center opacity-60"><span>⋯</span>More</button></div>
+</div>
+
+<!-- MODAL + TOAST -->
+<div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div class="bg-[#111] w-full max-w-[350px] rounded-2xl p-5"><h3 id="modalTitle" class="font-bold">DEPOSIT</h3><p class="text-[11px] text-[#22c55e]">Min KSh 500 (Demo)</p><input id="modalAmount" type="number" value="500" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center font-bold text-[18px] mt-3"><div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center"></div><div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-3 rounded-xl">Cancel</button><button onclick="confirmModal()" class="bg-white text-black py-3 rounded-xl font-black">CONFIRM</button></div></div></div>
+<div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#22c55e] text-black px-6 py-2 rounded-full text-[12px] font-bold z-[200]">Saved!</div>
+
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+let accounts={demo:{bal:1000},real:{bal:0}}; let currentAcc='demo', modalType='deposit', price=5000, bal=1000;
+let symbols=[{s:'XAUUSD',price:4424.6,change:-0.68},{s:'BTCUSD',price:79842.8,change:-0.04},{s:'EURUSD',price:1.1611,change:0.26},{s:'USDJPY',price:156.23,change:-2.41},{s:'GBPUSD',price:1.35145,change:-0.13}];
+function renderMarket(){var h=''; symbols.forEach(function(i){var up=i.change>=0;var col=up?'text-[#22c55e]':'text-[#ef4444]';h+='<div class="flex justify-between items-center py-3 border-b border-white/5"><div class="w-[25%]"><b class="text-[13px]">'+i.s+'</b><div class="text-[11px] '+col+'">'+(up?'▲':'▼')+' '+Math.abs(i.change).toFixed(2)+'%</div></div><div class="flex gap-2 w-[65%]"><div class="flex-1 bg-[#151515] rounded-lg p-2 text-center"><div class="text-[10px] opacity-50">Sell</div><div class="text-[11px] font-bold">'+(i.price-0.02).toFixed(2)+'</div></div><div class="flex-1 bg-[#151515] rounded-lg p-2 text-center"><div class="text-[10px] opacity-50">Buy</div><div class="text-[11px] font-bold">'+(i.price+0.02).toFixed(2)+'</div></div></div><div class="opacity-30" onclick="openChart(\''+i.s+'\')">›</div></div>';}); document.getElementById('marketList').innerHTML=h;}
+renderMarket(); setInterval(function(){symbols.forEach(function(s){s.price+=(Math.random()-0.5)*0.3;}); renderMarket();},800);
+// Chart - wrapped in try so it never breaks login
+try{
+var data=[],series;
+var chart=LightweightCharts.createChart(document.getElementById('chart'),{layout:{background:{color:'#000'},textColor:'#444'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}},width:430,height:320});
+series=chart.addLineSeries({color:'#22c55e',lineWidth:2});
+function gen(){data.push({time:Date.now()/1000,value:price}); if(data.length>120)data.shift(); series.setData(data);}
+setInterval(function(){price+=(Math.random()-0.5)*0.8; gen();},120);
+gen();
+}catch(e){document.getElementById('chart').innerHTML='<div style="padding:100px 20px;text-align:center;opacity:0.3">Chart offline - trading still works</div>';}
+function openChart(s){document.getElementById('tradeSymbol').innerText=s; showPhase('trade');}
+function switchAcc(t){currentAcc=t; document.getElementById('balAcc').innerText='KSh '+accounts[t].bal.toFixed(2); document.getElementById('realActions').className=t==='real'?'mt-4':'hidden mt-4'; document.getElementById('demoBtn').className=t==='demo'?'flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]':'flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]'; document.getElementById('realBtn').className=t==='real'?'flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]':'flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]';}
+function openModal(t){modalType=t; document.getElementById('modal').classList.remove('hidden'); document.getElementById('modalTitle').innerText=t.toUpperCase()+' - DEMO'; document.getElementById('errorMsg').classList.add('hidden');}
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
+function confirmModal(){var amt=parseFloat(document.getElementById('modalAmount').value); if(!amt||amt<500){document.getElementById('errorMsg').innerText='Min KSh 500'; document.getElementById('errorMsg').classList.remove('hidden'); return;} if(modalType==='deposit') accounts[currentAcc].bal+=amt; else {if(amt>accounts[currentAcc].bal){document.getElementById('errorMsg').innerText='Insufficient'; document.getElementById('errorMsg').classList.remove('hidden'); return;} accounts[currentAcc].bal-=amt;} closeModal(); switchAcc(currentAcc); showToast(modalType+' success '+amt);}
+function doTrade(dir){var acc=accounts[currentAcc]; var stake=parseFloat(document.getElementById('stake').value); if(stake<10){document.getElementById('status').innerText='Min stake 10'; return;} if(stake>acc.bal){alert('No balance - deposit demo'); return;} var entry=price; document.getElementById('status').innerText=dir+' @ '+entry.toFixed(2)+'... 0.7s'; setTimeout(function(){var exit=price; var win=(dir==='BUY'&&exit>entry)||(dir==='SELL'&&exit<entry); if(Math.random()>0.3){win=Math.random()>0.5;} var profit=win?stake*0.95:-stake; acc.bal+=profit; switchAcc(currentAcc); document.getElementById('status').innerText=win? 'WIN +'+profit.toFixed(2) : 'LOSS -'+stake; var row='<div class="flex justify-between border-b border-white/10 py-1 '+(win?'text-green-500':'text-red-500')+'"><span>'+dir+' '+entry.toFixed(1)+'→'+exit.toFixed(1)+'</span><span>'+(win?'+'+profit.toFixed(2):'-'+stake)+'</span></div>'; document.getElementById('hist').innerHTML=row+document.getElementById('hist').innerHTML;},700);}
+function upd(){var s=parseFloat(document.getElementById('stake').value)||0; document.getElementById('payoutVal').innerText=(s*0.95).toFixed(2);} document.getElementById('stake').addEventListener('input',upd); upd();
+function saveProfile(){var n=document.getElementById('profName').value; var e=document.getElementById('profEmail').value; localStorage.setItem('apex_name',n); localStorage.setItem('apex_email',e); document.getElementById('moreName').innerText=n; document.getElementById('moreEmail').innerText=e; showToast('Profile updated!');}
+function sendChat(){var inp=document.getElementById('chatInput'); var txt=inp.value; if(!txt) return; var box=document.getElementById('chatBox'); box.innerHTML+='<div class="bg-[#0a84ff] p-2 rounded-lg w-fit ml-auto">'+txt+'</div>'; inp.value=''; setTimeout(function(){box.innerHTML+='<div class="bg-[#222] p-2 rounded-lg w-fit">Thanks! Support will reply soon. Min KSh 500, 95% payout. 🚀</div>'; box.scrollTop=box.scrollHeight;},1000); box.scrollTop=box.scrollHeight;}
+(function(){var n=localStorage.getItem('apex_name'); if(n){document.getElementById('loginScreen').style.display='none'; document.getElementById('moreName').innerText=n; document.getElementById('moreEmail').innerText=localStorage.getItem('apex_email')||'guest';}})();
+showPhase('market'); switchAcc('demo');
+</script></body></html>
