@@ -1,294 +1,115 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>APEX TRADE - LIVE</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,system-ui}
-body{background:#000;color:#fff}
-.wrap{max-width:430px;margin:0 auto;min-height:100vh;background:#000;display:flex;flex-direction:column}
-.inp{width:100%;background:#171717;border:1px solid #2a2a2a;padding:14px;border-radius:12px;color:#fff;margin-top:10px;font-size:14px}
-.btn{width:100%;padding:14px;border:0;border-radius:12px;font-weight:900;cursor:pointer}
-.btn-w{background:#fff;color:#000}
-.btn-g{background:#22c55e;color:#000}
-.btn-d{background:#222;color:#fff}
-.card{background:#111;border:1px solid #222;border-radius:14px;padding:12px;margin-top:10px}
-.phase{flex:1;overflow:auto;padding:12px}
-.hidden{display:none!important}
-.nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #222;background:#000;padding:6px 0}
-.nav button{background:0;border:0;color:#fff;opacity:.6;font-size:11px}
-.nav button.on{opacity:1;font-weight:900}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:14px;z-index:999}
-.box{background:#161616;border:1px solid #333;border-radius:18px;padding:16px;width:100%;max-width:360px}
-.candle{width:4px;display:inline-block;margin-right:2px;border-radius:2px}
-</style>
-</head>
-<body>
-<div class="wrap">
+<!-- REPLACE your <div id="p-trade"> with this PRO version -->
 
-<!-- AUTH - BLACK -->
-<div id="auth" style="position:fixed;inset:0;background:#000;z-index:100;padding:20px;overflow:auto">
-<div style="text-align:center;margin:20px 0">
-<div style="width:70px;height:70px;background:#111;border-radius:20px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:30px">A↗</div>
-<b style="display:block;margin-top:8px;letter-spacing:3px">APEX TRADE</b>
-<span style="font-size:10px;opacity:.5">95% Payout • 0.7s • Min KSh 500</span>
-</div>
-
-<div id="siBox">
-<h3>Sign In</h3>
-<input id="siE" class="inp" placeholder="Email address">
-<input id="siP" class="inp" type="password" placeholder="Password">
-<div id="siErr" class="hidden" style="color:#ff4444;font-size:11px;text-align:center;margin-top:8px;font-weight:bold"></div>
-<button onclick="doSI()" class="btn btn-w" style="margin-top:12px">SIGN IN →</button>
-<p style="text-align:center;font-size:12px;margin-top:10px;opacity:.6">No account? <button onclick="showA('su')" style="background:0;border:0;color:#3b82f6;font-weight:900">Sign Up</button></p>
-</div>
-
-<div id="suBox" class="hidden">
-<h3>Create Account</h3>
-<input id="suN" class="inp" placeholder="Full Name">
-<input id="suE" class="inp" placeholder="Email address">
-<input id="suPh" class="inp" placeholder="M-Pesa Phone 07..." style="border:1px solid #22c55e55">
-<input id="suP" class="inp" type="password" placeholder="Password (min 6)">
-<input id="suCP" class="inp" type="password" placeholder="Confirm Password">
-<div id="suErr" class="hidden" style="color:#ff4444;font-size:11px;text-align:center;margin-top:8px;font-weight:bold"></div>
-<button onclick="doSU()" class="btn btn-g" style="margin-top:12px">SIGN UP →</button>
-<p style="text-align:center;font-size:12px;margin-top:10px;opacity:.6">Have account? <button onclick="showA('si')" style="background:0;border:0;color:#3b82f6;font-weight:900">Sign In</button></p>
-</div>
-</div>
-
-<!-- TOP BALANCE -->
-<div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #111">
-<div><span id="accL" style="font-size:10px;background:#111;padding:4px 8px;border-radius:6px">DEMO</span><br><b id="balT" style="font-size:16px">KSh 1,000.00</b></div>
-<button onclick="showP('funds')" class="btn btn-w" style="width:auto;padding:8px 14px;font-size:11px">Deposit</button>
-</div>
-
-<!-- MARKETS - RUNNING -->
-<div id="p-market" class="phase">
-<div style="display:flex;justify-content:space-between"><b>Markets • RUNNING LIVE</b><span style="font-size:10px;color:#22c55e">● LIVE 0.7s</span></div>
-<div id="mList" style="margin-top:10px"></div>
-</div>
-
-<!-- TRADE - CHART RUNNING -->
 <div id="p-trade" class="phase hidden">
 <button onclick="showP('market')" style="background:0;border:0;color:#fff">← Markets</button>
-<div class="card" style="text-align:center">
-<div id="tSym" style="font-size:11px;opacity:.6">XAUUSD</div>
-<div id="tPrice" style="font-size:38px;font-weight:900">4424.60</div>
-<div style="font-size:10px;opacity:.5">Chart RUNNING • Execution 0.7s</div>
-<div id="chart" style="margin-top:10px;height:80px;background:#000;border-radius:12px;display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:6px;overflow:hidden"></div>
+
+<!-- GRAPH OPTIONS BAR -->
+<div style="display:flex;gap:6px;margin:10px 0;overflow:auto">
+<button onclick="setType('candle')" id="t-candle" class="btn btn-w" style="padding:6px 10px;font-size:10px;width:auto">🕯️ Candles</button>
+<button onclick="setType('line')" id="t-line" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto">Line</button>
+<button onclick="setType('area')" id="t-area" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto">Area</button>
+<button onclick="toggleMA()" id="t-ma" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto">MA: OFF</button>
 </div>
+
+<div style="display:flex;gap:6px;margin-bottom:8px;overflow:auto">
+<button onclick="setTF(1)" id="tf-1" class="btn btn-w" style="padding:6px 10px;font-size:10px;width:auto">1s</button>
+<button onclick="setTF(5)" id="tf-5" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto">5s</button>
+<button onclick="setTF(30)" id="tf-30" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto">30s</button>
+<button onclick="setTF(60)" id="tf-60" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto">1m</button>
+<button onclick="fullChart()" class="btn btn-d" style="padding:6px 10px;font-size:10px;width:auto;margin-left:auto">⛶ Full</button>
+</div>
+
+<div class="card" style="text-align:center;padding:8px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span id="tSym" style="font-size:11px;opacity:.6">XAUUSD</span>
+<span id="tChange" style="font-size:11px;color:#22c55e">+0.32%</span>
+<span id="tPrice" style="font-size:20px;font-weight:900">4424.60</span>
+</div>
+
+<!-- CANVAS PRO CHART -->
+<canvas id="proChart" width="340" height="220" style="width:100%;height:220px;background:#000;border-radius:12px;margin-top:8px"></canvas>
+
+<div style="display:flex;justify-content:space-between;font-size:10px;opacity:.5;margin-top:6px">
+<span>O: <b id="oVal">4424.1</b></span>
+<span>H: <b id="hVal">4425.8</b></span>
+<span>L: <b id="lVal">4423.2</b></span>
+<span>C: <b id="cVal">4424.6</b></span>
+</div>
+</div>
+
 <div class="card">
 <label style="font-size:11px;opacity:.6">Stake KSh (Min 50)</label>
 <input id="tAmt" type="number" value="100" class="inp" style="text-align:center;font-weight:900;font-size:18px">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-<button onclick="doT('buy')" class="btn btn-g" style="padding:18px;font-size:16px">▲ BUY</button>
-<button onclick="doT('sell')" class="btn" style="padding:18px;background:#ef4444;color:#fff;font-size:16px">▼ SELL</button>
+<button onclick="doT('buy')" class="btn btn-g" style="padding:18px">▲ BUY • 95%</button>
+<button onclick="doT('sell')" class="btn" style="padding:18px;background:#ef4444;color:#fff">▼ SELL • 95%</button>
 </div>
 </div>
 <div id="pos"></div>
 </div>
 
-<!-- FUNDS -->
-<div id="p-funds" class="phase hidden">
-<b>Funds</b>
-<div class="card">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<button id="bD" onclick="swA('demo')" class="btn btn-w" style="font-size:11px">DEMO<br><span id="bDemo">KSh 1000.00</span></button>
-<button id="bR" onclick="swA('real')" class="btn btn-d" style="font-size:11px">REAL<br><span id="bReal">KSh 0.00</span></button>
-</div>
-<div id="rAct" class="hidden" style="margin-top:12px">
-<button onclick="openM('dep')" class="btn btn-w">Deposit - Enter Phone Number</button>
-<button onclick="openM('with')" class="btn btn-d" style="margin-top:8px">Withdraw to M-Pesa</button>
-<p style="font-size:10px;opacity:.4;text-align:center;margin-top:8px">Min KSh 500</p>
-</div>
-</div>
-</div>
-
-<!-- MORE -->
-<div id="p-more" class="phase hidden">
-<div style="text-align:center;margin-top:20px">
-<b id="mName" style="font-size:18px">Guest</b><br>
-<span id="mEmail" style="font-size:12px;opacity:.5"></span><br>
-<span id="mPh" style="font-size:12px;color:#22c55e"></span>
-</div>
-<div class="card" style="margin-top:20px"><b style="font-size:12px">APEX TRADE</b><p style="font-size:11px;opacity:.6;margin-top:6px">95% Payout • 0.7s execution • Min deposit 500 • Demo 1000 free • M-Pesa deposit</p></div>
-<button onclick="logout()" class="btn btn-d" style="margin-top:14px">Logout</button>
-</div>
-
-<div class="nav">
-<button id="n-market" class="on" onclick="showP('market')">📈<br>Markets</button>
-<button id="n-trade" onclick="showP('trade')">📊<br>Trade</button>
-<button id="n-funds" onclick="showP('funds')">💰<br>Funds</button>
-<button id="n-more" onclick="showP('more')">⋯<br>More</button>
-</div>
-
-</div>
-<div id="modal" class="hidden modal"><div id="mBox" class="box"></div></div>
-
 <script>
-var mk=[
-{n:'XAUUSD',p:4424.60},{n:'BTCUSD',p:79842},{n:'EURUSD',p:1.0842},
-{n:'Volatility 75',p:1234.22},{n:'Boom 1000',p:452.12},{n:'Crash 1000',p:892.33}
-];
-var bal={demo:1000,real:0},cA='demo',cP=4424.6,cS='XAUUSD';
+// ADD THIS PRO CHART ENGINE after your run() function
+let chartType='candle', tf=1, showMA=false, candles=[];
+let canvas, ctx;
+function initPro(){
+ canvas=document.getElementById('proChart'); ctx=canvas.getContext('2d');
+ setInterval(proTick, tf*1000);
+}
+function proTick(){
+ let last=candles.length?candles[candles.length-1].c:cP;
+ let open=last, close=cP+(Math.random()-0.5)*1.5;
+ let high=Math.max(open,close)+Math.random()*0.8;
+ let low=Math.min(open,close)-Math.random()*0.8;
+ candles.push({o:open,h:high,l:low,c:close,vol:20+Math.random()*80});
+ if(candles.length>60) candles.shift();
+ drawPro();
+ document.getElementById('oVal').innerText=open.toFixed(2);
+ document.getElementById('hVal').innerText=high.toFixed(2);
+ document.getElementById('lVal').innerText=low.toFixed(2);
+ document.getElementById('cVal').innerText=close.toFixed(2);
+ document.getElementById('tChange').innerText=((close-open)/open*100).toFixed(2)+'%';
+ document.getElementById('tChange').style.color=close>=open?'#22c55e':'#ef4444';
+}
+function drawPro(){
+ if(!ctx) return;
+ ctx.clearRect(0,0,340,220);
+ let min=Math.min(...candles.map(c=>c.l)), max=Math.max(...candles.map(c=>c.h));
+ let range=max-min||1;
+ let w=340/candles.length;
+ // grid
+ ctx.strokeStyle='#111'; ctx.lineWidth=1;
+ for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(0,i*55);ctx.lineTo(340,i*55);ctx.stroke();}
+ 
+ if(chartType==='line'){
+  ctx.strokeStyle='#22c55e'; ctx.lineWidth=2; ctx.beginPath();
+  candles.forEach((c,i)=>{let x=i*w+w/2, y=220-((c.c-min)/range*180)-20; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke();
+ } else if(chartType==='area'){
+  ctx.fillStyle='rgba(34,197,94,0.2)'; ctx.strokeStyle='#22c55e'; ctx.lineWidth=2; ctx.beginPath();
+  candles.forEach((c,i)=>{let x=i*w+w/2, y=220-((c.c-min)/range*180)-20; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.lineTo(340,220); ctx.lineTo(0,220); ctx.closePath(); ctx.fill(); ctx.stroke();
+ } else {
+  candles.forEach((c,i)=>{
+   let x=i*w+w/2, isUp=c.c>=c.o;
+   let yH=220-((c.h-min)/range*180)-20, yL=220-((c.l-min)/range*180)-20;
+   let yO=220-((c.o-min)/range*180)-20, yC=220-((c.c-min)/range*180)-20;
+   ctx.strokeStyle=isUp?'#22c55e':'#ef4444'; ctx.fillStyle=isUp?'#22c55e':'#ef4444';
+   ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+   ctx.fillRect(x-w*0.3, Math.min(yO,yC), w*0.6, Math.abs(yO-yC)||2);
+  });
+ }
+ if(showMA && candles.length>5){
+  ctx.strokeStyle='#facc15'; ctx.lineWidth=1.5; ctx.beginPath();
+  for(let i=0;i<candles.length;i++){
+   if(i<4) continue; let sum=0; for(let j=0;j<5;j++) sum+=candles[i-j].c; let ma=sum/5;
+   let x=i*w+w/2, y=220-((ma-min)/range*180)-20; if(i===4)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  } ctx.stroke();
+ }
+}
+function setType(t){chartType=t; document.getElementById('t-candle').className=t==='candle'?'btn btn-w':'btn btn-d'; document.getElementById('t-line').className=t==='line'?'btn btn-w':'btn btn-d'; document.getElementById('t-area').className=t==='area'?'btn btn-w':'btn btn-d'; drawPro();}
+function setTF(v){tf=v; ['1','5','30','60'].forEach(x=>document.getElementById('tf-'+x).className='btn btn-d'); document.getElementById('tf-'+v).className='btn btn-w';}
+function toggleMA(){showMA=!showMA; document.getElementById('t-ma').innerText='MA: '+(showMA?'ON':'OFF'); document.getElementById('t-ma').className=showMA?'btn btn-w':'btn btn-d';}
+function fullChart(){let c=document.getElementById('proChart'); if(c.requestFullscreen) c.requestFullscreen();}
 
-function showA(t){
- document.getElementById('siBox').classList.toggle('hidden',t!=='si');
- document.getElementById('suBox').classList.toggle('hidden',t!=='su');
-}
-function doSU(){
- var n=document.getElementById('suN').value.trim();
- var e=document.getElementById('suE').value.trim().toLowerCase();
- var ph=document.getElementById('suPh').value.trim();
- var pw=document.getElementById('suP').value;
- var cp=document.getElementById('suCP').value;
- var er=document.getElementById('suErr');
- if(n.length<3){er.innerText='Enter full name';er.classList.remove('hidden');return;}
- if(e.indexOf('@')<0){er.innerText='Valid email';er.classList.remove('hidden');return;}
- if(ph.length<10){er.innerText='Enter M-Pesa 07...';er.classList.remove('hidden');return;}
- if(pw.length<6){er.innerText='Password min 6';er.classList.remove('hidden');return;}
- if(pw!==cp){er.innerText='Passwords not match';er.classList.remove('hidden');return;}
- var u=JSON.parse(localStorage.getItem('apex_users')||'[]');
- if(u.find(x=>x.email===e)){er.innerText='Email exists - Sign In';er.classList.remove('hidden');return;}
- u.push({name:n,email:e,phone:ph,pass:pw});
- localStorage.setItem('apex_users',JSON.stringify(u));
- localStorage.setItem('apex_current',e);
- localStorage.setItem('apex_name',n);
- localStorage.setItem('apex_phone',ph);
- ok(n,e,ph);
-}
-function doSI(){
- var e=document.getElementById('siE').value.trim().toLowerCase();
- var pw=document.getElementById('siP').value;
- var er=document.getElementById('siErr');
- var u=JSON.parse(localStorage.getItem('apex_users')||'[]');
- var f=u.find(x=>x.email===e&&x.pass===pw);
- if(!f){er.innerText='Wrong email or password';er.classList.remove('hidden');return;}
- localStorage.setItem('apex_current',f.email);
- localStorage.setItem('apex_name',f.name);
- localStorage.setItem('apex_phone',f.phone);
- ok(f.name,f.email,f.phone);
-}
-function ok(n,e,p){
- document.getElementById('auth').style.display='none';
- document.getElementById('mName').innerText=n;
- document.getElementById('mEmail').innerText=e;
- document.getElementById('mPh').innerText=p;
- render();
- run();
- upd();
-}
-function logout(){localStorage.removeItem('apex_current');location.reload();}
-function showP(p){
- document.querySelectorAll('.phase').forEach(x=>x.classList.add('hidden'));
- document.getElementById('p-'+p).classList.remove('hidden');
- document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
- var nb=document.getElementById('n-'+p); if(nb)nb.classList.add('on');
- if(p==='funds')upd();
-}
-function render(){
- var h='';
- for(var i=0;i<mk.length;i++){
-  var m=mk[i];
-  h+='<div onclick="openT(\''+m.n+'\')" class="card" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer"><div><b style="font-size:13px">'+m.n+'</b><br><span style="font-size:10px;opacity:.5">95% Payout • 0.7s</span></div><div style="text-align:right"><b id="pr-'+i+'">'+m.p.toFixed(2)+'</b><br><span style="font-size:11px;color:#22c55e">● LIVE</span></div></div>';
- }
- document.getElementById('mList').innerHTML=h;
-}
-function openT(s){
- cS=s;
- var m=mk.find(x=>x.n===s); cP=m.p;
- document.getElementById('tSym').innerText=s;
- document.getElementById('tPrice').innerText=cP.toFixed(2);
- showP('trade');
-}
-function run(){
- setInterval(function(){
-  cP+=(Math.random()-0.5)*1.8;
-  var tp=document.getElementById('tPrice');
-  if(tp){tp.innerText=cP.toFixed(2); tp.style.color=(Math.random()>0.5?'#22c55e':'#ef4444');}
-  for(var i=0;i<mk.length;i++){
-   mk[i].p+=(Math.random()-0.5)*0.8;
-   var el=document.getElementById('pr-'+i);
-   if(el)el.innerText=mk[i].p.toFixed(2);
-  }
-  var chart=document.getElementById('chart');
-  if(chart){
-   var d=document.createElement('div');
-   d.className='candle';
-   d.style.height=(15+Math.random()*45)+'px';
-   d.style.background=(Math.random()>0.5?'#22c55e':'#ef4444');
-   chart.appendChild(d);
-   if(chart.children.length>22) chart.removeChild(chart.children[0]);
-  }
- },700);
-}
-function doT(dir){
- var amt=parseFloat(document.getElementById('tAmt').value);
- if(isNaN(amt)||amt<50){alert('Min KSh 50');return;}
- if(amt>bal[cA]){alert('Low balance - Switch to DEMO or Deposit');return;}
- bal[cA]-=amt; upd();
- var entry=cP; var id=Date.now();
- var div=document.createElement('div');
- div.id='pos-'+id; div.className='card'; div.style.fontSize='12px';
- div.innerText='⏳ '+dir.toUpperCase()+' '+cS+' KSh '+amt+' @ '+entry.toFixed(2)+' - 0.7s...';
- document.getElementById('pos').appendChild(div);
- setTimeout(function(){
-  var win=Math.random()>0.45;
-  var el=document.getElementById('pos-'+id);
-  if(win){bal[cA]+=amt*1.95; if(el){el.innerText='✅ WIN '+dir.toUpperCase()+' '+cS+' +KSh '+(amt*0.95).toFixed(0)+' | Exit '+cP.toFixed(2); el.style.border='1px solid #22c55e';}}
-  else{if(el){el.innerText='❌ LOSS '+dir.toUpperCase()+' '+cS+' -KSh '+amt+' | Exit '+cP.toFixed(2); el.style.border='1px solid #ef4444';}}
-  upd();
- },700);
-}
-function upd(){
- document.getElementById('bDemo').innerText='KSh '+bal.demo.toFixed(2);
- document.getElementById('bReal').innerText='KSh '+bal.real.toFixed(2);
- document.getElementById('balT').innerText='KSh '+(cA==='demo'?bal.demo:bal.real).toFixed(2);
- document.getElementById('accL').innerText=cA.toUpperCase();
- document.getElementById('rAct').className=cA==='real'?'':'hidden';
-}
-function swA(t){cA=t; document.getElementById('bD').className=t==='demo'?'btn btn-w':'btn btn-d'; document.getElementById('bR').className=t==='real'?'btn btn-w':'btn btn-d'; upd();}
-function openM(t){
- document.getElementById('modal').classList.remove('hidden');
- var ph=localStorage.getItem('apex_phone')||'07';
- if(t==='dep'){
-  document.getElementById('mBox').innerHTML='<h3>Deposit via M-Pesa</h3><p style="font-size:10px;color:#22c55e">Min KSh 500</p><label style="font-size:11px;opacity:.6;margin-top:12px;display:block">Deposit FROM (Your M-Pesa Number)</label><input id="dPh" value="'+ph+'" class="inp" style="border:2px solid #22c55e55;text-align:center;font-weight:bold"><label style="font-size:11px;opacity:.6;margin-top:8px;display:block">Amount</label><input id="mAmt" type="number" value="500" class="inp" style="text-align:center;font-weight:900"><div id="eM" class="hidden" style="color:#f44;font-size:11px;text-align:center;margin-top:6px"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button onclick="closeM()" class="btn btn-d">Cancel</button><button onclick="doDep()" class="btn btn-g">DEPOSIT NOW</button></div>';
- }else{
-  document.getElementById('mBox').innerHTML='<h3>Withdraw to M-Pesa</h3><input id="wPh" value="'+ph+'" class="inp" style="text-align:center;margin-top:12px"><input id="mAmt" type="number" value="500" class="inp" style="text-align:center"><div id="eM" class="hidden" style="color:#f44;font-size:11px;text-align:center"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button onclick="closeM()" class="btn btn-d">Cancel</button><button onclick="doWith()" class="btn btn-w">WITHDRAW</button></div>';
- }
-}
-function closeM(){document.getElementById('modal').classList.add('hidden');}
-function doDep(){
- var a=parseFloat(document.getElementById('mAmt').value);
- var ph=document.getElementById('dPh').value.trim();
- var er=document.getElementById('eM');
- if(isNaN(a)||a<500){er.innerText='Min KSh 500';er.classList.remove('hidden');return;}
- if(ph.length<10){er.innerText='Enter 07...';er.classList.remove('hidden');return;}
- document.getElementById('mBox').innerHTML='<div style="text-align:center"><div style="width:60px;height:60px;background:#22c55e;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#000;font-size:28px">📱</div><h3 style="margin-top:10px">STK Push to '+ph+'</h3><p style="font-size:12px;opacity:.7">KSh '+a+' Paybill 522522</p><input id="mpCode" placeholder="M-Pesa Code e.g QH12.." class="inp" style="text-align:center;margin-top:14px"><button onclick="confDep('+a+',\''+ph+'\')" class="btn btn-w" style="margin-top:10px">I HAVE PAID - VERIFY</button></div>';
-}
-function confDep(a,ph){
- var c=document.getElementById('mpCode').value.trim();
- if(c.length<5){alert('Enter M-Pesa code');return;}
- bal[cA]+=a; upd(); closeM(); alert('✅ KSh '+a+' added from '+ph);
-}
-function doWith(){
- var a=parseFloat(document.getElementById('mAmt').value);
- var ph=document.getElementById('wPh').value;
- var er=document.getElementById('eM');
- if(isNaN(a)||a<500||a>bal[cA]){er.innerText='Check amount/balance';er.classList.remove('hidden');return;}
- bal[cA]-=a; upd(); closeM(); alert('Withdraw KSh '+a+' to '+ph+' - Processing');
-}
-
-(function(){
- var cur=localStorage.getItem('apex_current');
- if(cur){
-  var u=JSON.parse(localStorage.getItem('apex_users')||'[]');
-  var f=u.find(x=>x.email===cur);
-  if(f){document.getElementById('auth').style.display='none'; document.getElementById('mName').innerText=f.name; document.getElementById('mEmail').innerText=f.email; document.getElementById('mPh').innerText=f.phone;}
- }
- render(); upd(); run();
-})();
+// call this in your ok() and after render
+setTimeout(initPro,500);
 </script>
-</body>
-</html>
