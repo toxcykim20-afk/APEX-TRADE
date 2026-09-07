@@ -1,42 +1,294 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Apex Trade</title>
-<style>*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial}body{background:#000;color:#fff}.wrap{max-width:430px;margin:0 auto;min-height:100vh;background:#000;display:flex;flex-direction:column}.input{width:100%;background:#141414;border:1px solid #262626;padding:14px;border-radius:12px;color:#fff;margin-top:8px}.btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:900;cursor:pointer}.btn-w{background:#fff;color:#000}.btn-g{background:#22c55e;color:#000}.btn-d{background:#222;color:#fff}.card{background:#111;border:1px solid #222;border-radius:14px;padding:12px;margin-top:10px}.phase{flex:1;overflow:auto;padding:12px}.hidden{display:none!important}.nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #222;background:#000;padding:6px 0}.nav button{background:0;border:0;color:#fff;font-size:11px;opacity:.6}.nav button.active{opacity:1}.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:14px;z-index:999}.modal-box{background:#151515;border:1px solid #222;border-radius:18px;padding:16px;width:100%;max-width:360px}</style>
-</head><body><div class="wrap">
-<div id="authScreen" style="position:fixed;inset:0;background:#000;z-index:100;overflow:auto;padding:20px">
-<div style="text-align:center;margin:20px 0"><div style="width:72px;height:72px;background:#111;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto">₿↗</div><b style="display:block;margin-top:10px;letter-spacing:3px">APEX TRADE</b><span style="font-size:10px;opacity:.5">Min 500 • 95% Payout • 0.7s</span></div>
-<div id="signinBox"><h3 style="font-weight:900">Sign In</h3><input id="siEmail" class="input" placeholder="Email address"><input id="siPass" class="input" type="password" placeholder="Password"><div id="siError" class="hidden" style="color:#ef4444;font-size:11px;text-align:center;margin-top:8px"></div><button onclick="doSignin()" class="btn btn-w" style="margin-top:12px">SIGN IN →</button><p style="text-align:center;font-size:12px;margin-top:12px;opacity:.6">No account? <button onclick="showAuth('signup')" style="background:0;border:0;color:#3b82f6;font-weight:900">Sign Up</button></p></div>
-<div id="signupBox" class="hidden"><h3 style="font-weight:900">Create Account</h3><input id="suName" class="input" placeholder="Full Name"><input id="suEmail" class="input" placeholder="Email address"><input id="suPhone" class="input" placeholder="M-Pesa Phone 07..." style="border-color:#22c55e55"><input id="suPass" class="input" type="password" placeholder="Password (min 6)"><input id="suCpass" class="input" type="password" placeholder="Confirm Password"><div id="suError" class="hidden" style="color:#ef4444;font-size:11px;text-align:center;margin-top:8px"></div><button onclick="doSignup()" class="btn btn-g" style="margin-top:12px">SIGN UP →</button><p style="text-align:center;font-size:12px;margin-top:12px;opacity:.6">Have account? <button onclick="showAuth('signin')" style="background:0;border:0;color:#3b82f6;font-weight:900">Sign In</button></p></div>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>APEX TRADE - LIVE</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,system-ui}
+body{background:#000;color:#fff}
+.wrap{max-width:430px;margin:0 auto;min-height:100vh;background:#000;display:flex;flex-direction:column}
+.inp{width:100%;background:#171717;border:1px solid #2a2a2a;padding:14px;border-radius:12px;color:#fff;margin-top:10px;font-size:14px}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;font-weight:900;cursor:pointer}
+.btn-w{background:#fff;color:#000}
+.btn-g{background:#22c55e;color:#000}
+.btn-d{background:#222;color:#fff}
+.card{background:#111;border:1px solid #222;border-radius:14px;padding:12px;margin-top:10px}
+.phase{flex:1;overflow:auto;padding:12px}
+.hidden{display:none!important}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #222;background:#000;padding:6px 0}
+.nav button{background:0;border:0;color:#fff;opacity:.6;font-size:11px}
+.nav button.on{opacity:1;font-weight:900}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:14px;z-index:999}
+.box{background:#161616;border:1px solid #333;border-radius:18px;padding:16px;width:100%;max-width:360px}
+.candle{width:4px;display:inline-block;margin-right:2px;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- AUTH - BLACK -->
+<div id="auth" style="position:fixed;inset:0;background:#000;z-index:100;padding:20px;overflow:auto">
+<div style="text-align:center;margin:20px 0">
+<div style="width:70px;height:70px;background:#111;border-radius:20px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:30px">A↗</div>
+<b style="display:block;margin-top:8px;letter-spacing:3px">APEX TRADE</b>
+<span style="font-size:10px;opacity:.5">95% Payout • 0.7s • Min KSh 500</span>
 </div>
-<div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #111"><div><span id="accLabel" style="font-size:10px;background:#111;padding:4px 8px;border-radius:6px">DEMO</span><br><b id="balTop">KSh 1,000.00</b></div><button onclick="showPhase('funds')" class="btn btn-w" style="width:auto;padding:8px 14px;font-size:11px">Deposit</button></div>
-<div id="phase-market" class="phase"><div style="display:flex;justify-content:space-between"><b>Markets</b><span style="font-size:10px;opacity:.5">LIVE • 95% Payout</span></div><div id="marketList" style="margin-top:10px"></div></div>
-<div id="phase-trade" class="phase hidden"><button onclick="showPhase('market')" style="background:0;border:0;color:#fff">← Markets</button><div class="card" style="text-align:center"><div id="tradeSym" style="font-size:11px;opacity:.6">XAUUSD</div><div id="tradePrice" style="font-size:36px;font-weight:900">4424.60</div><div style="font-size:10px;opacity:.5">Execution 0.7s</div><div id="chart" style="margin-top:10px;height:70px;background:#000;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:.6">📈 Price running...</div></div><div class="card"><label style="font-size:11px;opacity:.6">Stake KSh (Min 50)</label><input id="tradeAmt" type="number" value="100" class="input" style="text-align:center;font-weight:900;font-size:18px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button onclick="doTrade('buy')" class="btn btn-g" style="padding:18px">▲ BUY</button><button onclick="doTrade('sell')" class="btn" style="padding:18px;background:#ef4444;color:#fff">▼ SELL</button></div></div><div id="positions"></div></div>
-<div id="phase-funds" class="phase hidden"><b>Funds</b><div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button id="btnDemo" onclick="switchAcc('demo')" class="btn btn-w" style="font-size:11px">DEMO<br><span id="balDemo">KSh 1000</span></button><button id="btnReal" onclick="switchAcc('real')" class="btn btn-d" style="font-size:11px">REAL<br><span id="balReal">KSh 0</span></button></div><div id="realActions" class="hidden" style="margin-top:12px"><button onclick="openModal('deposit')" class="btn btn-w">Deposit - Enter M-Pesa Phone</button><button onclick="openModal('withdraw')" class="btn btn-d" style="margin-top:8px">Withdraw</button></div></div></div>
-<div id="phase-more" class="phase hidden"><div style="text-align:center"><b id="moreName">Guest</b><br><span id="moreEmail" style="font-size:12px;opacity:.5"></span><br><span id="morePhone" style="font-size:12px;color:#22c55e"></span></div><button onclick="logout()" class="btn btn-d" style="margin-top:20px">Logout</button></div>
-<div class="nav"><button id="nav-market" class="active" onclick="showPhase('market')">📈<br>Markets</button><button id="nav-trade" onclick="showPhase('trade')">📊<br>Trade</button><button id="nav-funds" onclick="showPhase('funds')">💰<br>Funds</button><button id="nav-more" onclick="showPhase('more')">⋯<br>More</button></div>
+
+<div id="siBox">
+<h3>Sign In</h3>
+<input id="siE" class="inp" placeholder="Email address">
+<input id="siP" class="inp" type="password" placeholder="Password">
+<div id="siErr" class="hidden" style="color:#ff4444;font-size:11px;text-align:center;margin-top:8px;font-weight:bold"></div>
+<button onclick="doSI()" class="btn btn-w" style="margin-top:12px">SIGN IN →</button>
+<p style="text-align:center;font-size:12px;margin-top:10px;opacity:.6">No account? <button onclick="showA('su')" style="background:0;border:0;color:#3b82f6;font-weight:900">Sign Up</button></p>
 </div>
-<div id="modal" class="hidden modal"><div id="modalBox" class="modal-box"></div></div>
+
+<div id="suBox" class="hidden">
+<h3>Create Account</h3>
+<input id="suN" class="inp" placeholder="Full Name">
+<input id="suE" class="inp" placeholder="Email address">
+<input id="suPh" class="inp" placeholder="M-Pesa Phone 07..." style="border:1px solid #22c55e55">
+<input id="suP" class="inp" type="password" placeholder="Password (min 6)">
+<input id="suCP" class="inp" type="password" placeholder="Confirm Password">
+<div id="suErr" class="hidden" style="color:#ff4444;font-size:11px;text-align:center;margin-top:8px;font-weight:bold"></div>
+<button onclick="doSU()" class="btn btn-g" style="margin-top:12px">SIGN UP →</button>
+<p style="text-align:center;font-size:12px;margin-top:10px;opacity:.6">Have account? <button onclick="showA('si')" style="background:0;border:0;color:#3b82f6;font-weight:900">Sign In</button></p>
+</div>
+</div>
+
+<!-- TOP BALANCE -->
+<div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #111">
+<div><span id="accL" style="font-size:10px;background:#111;padding:4px 8px;border-radius:6px">DEMO</span><br><b id="balT" style="font-size:16px">KSh 1,000.00</b></div>
+<button onclick="showP('funds')" class="btn btn-w" style="width:auto;padding:8px 14px;font-size:11px">Deposit</button>
+</div>
+
+<!-- MARKETS - RUNNING -->
+<div id="p-market" class="phase">
+<div style="display:flex;justify-content:space-between"><b>Markets • RUNNING LIVE</b><span style="font-size:10px;color:#22c55e">● LIVE 0.7s</span></div>
+<div id="mList" style="margin-top:10px"></div>
+</div>
+
+<!-- TRADE - CHART RUNNING -->
+<div id="p-trade" class="phase hidden">
+<button onclick="showP('market')" style="background:0;border:0;color:#fff">← Markets</button>
+<div class="card" style="text-align:center">
+<div id="tSym" style="font-size:11px;opacity:.6">XAUUSD</div>
+<div id="tPrice" style="font-size:38px;font-weight:900">4424.60</div>
+<div style="font-size:10px;opacity:.5">Chart RUNNING • Execution 0.7s</div>
+<div id="chart" style="margin-top:10px;height:80px;background:#000;border-radius:12px;display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:6px;overflow:hidden"></div>
+</div>
+<div class="card">
+<label style="font-size:11px;opacity:.6">Stake KSh (Min 50)</label>
+<input id="tAmt" type="number" value="100" class="inp" style="text-align:center;font-weight:900;font-size:18px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+<button onclick="doT('buy')" class="btn btn-g" style="padding:18px;font-size:16px">▲ BUY</button>
+<button onclick="doT('sell')" class="btn" style="padding:18px;background:#ef4444;color:#fff;font-size:16px">▼ SELL</button>
+</div>
+</div>
+<div id="pos"></div>
+</div>
+
+<!-- FUNDS -->
+<div id="p-funds" class="phase hidden">
+<b>Funds</b>
+<div class="card">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button id="bD" onclick="swA('demo')" class="btn btn-w" style="font-size:11px">DEMO<br><span id="bDemo">KSh 1000.00</span></button>
+<button id="bR" onclick="swA('real')" class="btn btn-d" style="font-size:11px">REAL<br><span id="bReal">KSh 0.00</span></button>
+</div>
+<div id="rAct" class="hidden" style="margin-top:12px">
+<button onclick="openM('dep')" class="btn btn-w">Deposit - Enter Phone Number</button>
+<button onclick="openM('with')" class="btn btn-d" style="margin-top:8px">Withdraw to M-Pesa</button>
+<p style="font-size:10px;opacity:.4;text-align:center;margin-top:8px">Min KSh 500</p>
+</div>
+</div>
+</div>
+
+<!-- MORE -->
+<div id="p-more" class="phase hidden">
+<div style="text-align:center;margin-top:20px">
+<b id="mName" style="font-size:18px">Guest</b><br>
+<span id="mEmail" style="font-size:12px;opacity:.5"></span><br>
+<span id="mPh" style="font-size:12px;color:#22c55e"></span>
+</div>
+<div class="card" style="margin-top:20px"><b style="font-size:12px">APEX TRADE</b><p style="font-size:11px;opacity:.6;margin-top:6px">95% Payout • 0.7s execution • Min deposit 500 • Demo 1000 free • M-Pesa deposit</p></div>
+<button onclick="logout()" class="btn btn-d" style="margin-top:14px">Logout</button>
+</div>
+
+<div class="nav">
+<button id="n-market" class="on" onclick="showP('market')">📈<br>Markets</button>
+<button id="n-trade" onclick="showP('trade')">📊<br>Trade</button>
+<button id="n-funds" onclick="showP('funds')">💰<br>Funds</button>
+<button id="n-more" onclick="showP('more')">⋯<br>More</button>
+</div>
+
+</div>
+<div id="modal" class="hidden modal"><div id="mBox" class="box"></div></div>
+
 <script>
-var markets=[{n:'XAUUSD',p:4424.6},{n:'BTCUSD',p:79842},{n:'EURUSD',p:1.0842},{n:'Volatility 75',p:1234.2},{n:'Boom 1000',p:452.1},{n:'Crash 1000',p:892.3}];
-var bal={demo:1000,real:0},curAcc='demo',curPrice=4424.6,curSym='XAUUSD';
-function showAuth(t){document.getElementById('signinBox').classList.add('hidden');document.getElementById('signupBox').classList.add('hidden');document.getElementById(t+'Box').classList.remove('hidden');}
-function doSignup(){var n=document.getElementById('suName').value.trim();var e=document.getElementById('suEmail').value.trim().toLowerCase();var ph=document.getElementById('suPhone').value.trim();var pw=document.getElementById('suPass').value;var cp=document.getElementById('suCpass').value;var err=document.getElementById('suError');if(n.length<3){err.innerText='Enter full name';err.classList.remove('hidden');return;}if(e.indexOf('@')==-1){err.innerText='Enter valid email';err.classList.remove('hidden');return;}if(ph.length<10){err.innerText='Enter M-Pesa 07...';err.classList.remove('hidden');return;}if(pw.length<6){err.innerText='Password min 6';err.classList.remove('hidden');return;}if(pw!==cp){err.innerText='No match';err.classList.remove('hidden');return;}var users=JSON.parse(localStorage.getItem('apex_users')||'[]');if(users.find(u=>u.email===e)){err.innerText='Exists - Sign In';err.classList.remove('hidden');return;}users.push({name:n,email:e,phone:ph,pass:pw});localStorage.setItem('apex_users',JSON.stringify(users));localStorage.setItem('apex_current',e);localStorage.setItem('apex_name',n);localStorage.setItem('apex_phone',ph);loginOk(n,e,ph);}
-function doSignin(){var e=document.getElementById('siEmail').value.trim().toLowerCase();var pw=document.getElementById('siPass').value;var err=document.getElementById('siError');var users=JSON.parse(localStorage.getItem('apex_users')||'[]');var u=users.find(x=>x.email===e&&x.pass===pw);if(!u){err.innerText='Wrong email/pass';err.classList.remove('hidden');return;}localStorage.setItem('apex_current',u.email);localStorage.setItem('apex_name',u.name);localStorage.setItem('apex_phone',u.phone);loginOk(u.name,u.email,u.phone);}
-function loginOk(n,e,p){document.getElementById('authScreen').style.display='none';document.getElementById('moreName').innerText=n;document.getElementById('moreEmail').innerText=e;document.getElementById('morePhone').innerText=p;renderMarkets();startPrice();}
+var mk=[
+{n:'XAUUSD',p:4424.60},{n:'BTCUSD',p:79842},{n:'EURUSD',p:1.0842},
+{n:'Volatility 75',p:1234.22},{n:'Boom 1000',p:452.12},{n:'Crash 1000',p:892.33}
+];
+var bal={demo:1000,real:0},cA='demo',cP=4424.6,cS='XAUUSD';
+
+function showA(t){
+ document.getElementById('siBox').classList.toggle('hidden',t!=='si');
+ document.getElementById('suBox').classList.toggle('hidden',t!=='su');
+}
+function doSU(){
+ var n=document.getElementById('suN').value.trim();
+ var e=document.getElementById('suE').value.trim().toLowerCase();
+ var ph=document.getElementById('suPh').value.trim();
+ var pw=document.getElementById('suP').value;
+ var cp=document.getElementById('suCP').value;
+ var er=document.getElementById('suErr');
+ if(n.length<3){er.innerText='Enter full name';er.classList.remove('hidden');return;}
+ if(e.indexOf('@')<0){er.innerText='Valid email';er.classList.remove('hidden');return;}
+ if(ph.length<10){er.innerText='Enter M-Pesa 07...';er.classList.remove('hidden');return;}
+ if(pw.length<6){er.innerText='Password min 6';er.classList.remove('hidden');return;}
+ if(pw!==cp){er.innerText='Passwords not match';er.classList.remove('hidden');return;}
+ var u=JSON.parse(localStorage.getItem('apex_users')||'[]');
+ if(u.find(x=>x.email===e)){er.innerText='Email exists - Sign In';er.classList.remove('hidden');return;}
+ u.push({name:n,email:e,phone:ph,pass:pw});
+ localStorage.setItem('apex_users',JSON.stringify(u));
+ localStorage.setItem('apex_current',e);
+ localStorage.setItem('apex_name',n);
+ localStorage.setItem('apex_phone',ph);
+ ok(n,e,ph);
+}
+function doSI(){
+ var e=document.getElementById('siE').value.trim().toLowerCase();
+ var pw=document.getElementById('siP').value;
+ var er=document.getElementById('siErr');
+ var u=JSON.parse(localStorage.getItem('apex_users')||'[]');
+ var f=u.find(x=>x.email===e&&x.pass===pw);
+ if(!f){er.innerText='Wrong email or password';er.classList.remove('hidden');return;}
+ localStorage.setItem('apex_current',f.email);
+ localStorage.setItem('apex_name',f.name);
+ localStorage.setItem('apex_phone',f.phone);
+ ok(f.name,f.email,f.phone);
+}
+function ok(n,e,p){
+ document.getElementById('auth').style.display='none';
+ document.getElementById('mName').innerText=n;
+ document.getElementById('mEmail').innerText=e;
+ document.getElementById('mPh').innerText=p;
+ render();
+ run();
+ upd();
+}
 function logout(){localStorage.removeItem('apex_current');location.reload();}
-function showPhase(p){document.querySelectorAll('.phase').forEach(x=>x.classList.add('hidden'));document.getElementById('phase-'+p).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));var nb=document.getElementById('nav-'+p);if(nb)nb.classList.add('active');if(p==='funds')updateBal();}
-function renderMarkets(){var h='';for(var i=0;i<markets.length;i++){var m=markets[i];h+='<div onclick="openTrade(\''+m.n+'\')" class="card" style="display:flex;justify-content:space-between;cursor:pointer"><div><b style="font-size:13px">'+m.n+'</b><br><span style="font-size:10px;opacity:.5">95% • 0.7s</span></div><div style="text-align:right"><b>'+m.p.toFixed(2)+'</b><br><span style="font-size:11px;color:#22c55e">▲ LIVE</span></div></div>';}document.getElementById('marketList').innerHTML=h;}
-function openTrade(sym){curSym=sym;var m=markets.find(x=>x.n===sym);curPrice=m.p;document.getElementById('tradeSym').innerText=sym;document.getElementById('tradePrice').innerText=curPrice.toFixed(2);showPhase('trade');}
-function startPrice(){setInterval(function(){var ch=(Math.random()-0.5)*2;curPrice+=ch;var el=document.getElementById('tradePrice');if(el){el.innerText=curPrice.toFixed(2);el.style.color=ch>=0?'#22c55e':'#ef4444';}for(var i=0;i<markets.length;i++){markets[i].p+=(Math.random()-0.5)*1;}},700);}
-function doTrade(dir){var amt=parseFloat(document.getElementById('tradeAmt').value);if(isNaN(amt)||amt<50){alert('Min KSh 50');return;}if(amt>bal[curAcc]){alert('Low balance. Switch to DEMO or Deposit');return;}bal[curAcc]-=amt;updateBal();var entry=curPrice;var id=Date.now();var div=document.createElement('div');div.id='pos-'+id;div.className='card';div.style.fontSize='12px';div.innerHTML='⏳ '+dir.toUpperCase()+' '+curSym+' KSh '+amt+' @ '+entry.toFixed(2)+' - 0.7s...';document.getElementById('positions').appendChild(div);setTimeout(function(){resolveTrade(id,dir,amt,entry);},700);}
-function resolveTrade(id,dir,amt,entry){var win=Math.random()>0.45;var el=document.getElementById('pos-'+id);if(win){bal[curAcc]+=amt*1.95;if(el){el.innerHTML='✅ WIN '+dir.toUpperCase()+' '+curSym+' +KSh '+(amt*0.95).toFixed(0)+' | Exit '+curPrice.toFixed(2);el.style.border='1px solid #22c55e';}}else{if(el){el.innerHTML='❌ LOSS '+dir.toUpperCase()+' '+curSym+' -KSh '+amt+' | Exit '+curPrice.toFixed(2);el.style.border='1px solid #ef4444';}}updateBal();}
-function updateBal(){document.getElementById('balDemo').innerText='KSh '+bal.demo.toFixed(2);document.getElementById('balReal').innerText='KSh '+bal.real.toFixed(2);document.getElementById('balTop').innerText='KSh '+(curAcc==='demo'?bal.demo:bal.real).toFixed(2);document.getElementById('accLabel').innerText=curAcc.toUpperCase();var ra=document.getElementById('realActions');if(ra)ra.className=curAcc==='real'?'':'hidden';}
-function switchAcc(t){curAcc=t;document.getElementById('btnDemo').className=t==='demo'?'btn btn-w':'btn btn-d';document.getElementById('btnReal').className=t==='real'?'btn btn-w':'btn btn-d';updateBal();}
-function openModal(t){document.getElementById('modal').classList.remove('hidden');var box=document.getElementById('modalBox');var savedPhone=localStorage.getItem('apex_phone')||'07';if(t==='deposit'){box.innerHTML='<h3 style="font-weight:900">Deposit via M-Pesa</h3><p style="font-size:10px;color:#22c55e;margin-top:4px">Min KSh 500</p><label style="font-size:11px;opacity:.6;margin-top:12px;display:block">Deposit FROM (Your M-Pesa Number)</label><input id="depositPhone" value="'+savedPhone+'" class="input" style="border:2px solid #22c55e55;text-align:center;font-weight:bold"><label style="font-size:11px;opacity:.6;margin-top:10px;display:block">Amount</label><input id="modalAmount" type="number" value="500" class="input" style="text-align:center;font-weight:900"><div id="err" class="hidden" style="color:#ef4444;font-size:11px;text-align:center;margin-top:6px"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button onclick="closeModal()" class="btn btn-d">Cancel</button><button onclick="doStk()" class="btn btn-g">DEPOSIT NOW</button></div>';}else{box.innerHTML='<h3 style="font-weight:900">Withdraw</h3><input id="withdrawPhone" value="'+savedPhone+'" class="input" style="margin-top:12px;text-align:center"><input id="modalAmount" type="number" value="500" class="input" style="text-align:center;font-weight:900"><div id="err" class="hidden" style="color:#ef4444;font-size:11px;text-align:center"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button onclick="closeModal()" class="btn btn-d">Cancel</button><button onclick="doWithdraw()" class="btn btn-w">WITHDRAW</button></div>';}}
-function closeModal(){document.getElementById('modal').classList.add('hidden');}
-function doStk(){var amt=parseFloat(document.getElementById('modalAmount').value);var ph=document.getElementById('depositPhone').value.trim();var err=document.getElementById('err');if(isNaN(amt)||amt<500){err.innerText='Min 500';err.classList.remove('hidden');return;}if(ph.length<10){err.innerText='Enter 07...';err.classList.remove('hidden');return;}document.getElementById('modalBox').innerHTML='<div style="text-align:center"><div style="width:60px;height:60px;background:#22c55e;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#000;font-size:28px">📱</div><h3 style="font-weight:900;margin-top:12px">STK to '+ph+'</h3><p style="font-size:12px;opacity:.7;margin-top:6px">KSh '+amt+' Paybill 522522</p><input id="mpesaCode" placeholder="M-Pesa Code" class="input" style="margin-top:16px;text-align:center"><button onclick="confirmStk('+amt+',\''+ph+'\')" class="btn btn-w" style="margin-top:10px">VERIFY</button></div>';}
-function confirmStk(amt,ph){var c=document.getElementById('mpesaCode').value.trim();if(c.length<5){alert('Enter code');return;}bal[curAcc]+=amt;updateBal();closeModal();alert('✅ KSh '+amt+' from '+ph+' added');}
-function doWithdraw(){var amt=parseFloat(document.getElementById('modalAmount').value);var ph=document.getElementById('withdrawPhone').value;if(isNaN(amt)||amt<500||amt>bal[curAcc]){document.getElementById('err').innerText='Check amount';document.getElementById('err').classList.remove('hidden');return;}bal[curAcc]-=amt;updateBal();closeModal();alert('Withdraw KSh '+amt+' to '+ph);}
-(function(){var cur=localStorage.getItem('apex_current');if(cur){var users=JSON.parse(localStorage.getItem('apex_users')||'[]');var u=users.find(x=>x.email===cur);if(u){document.getElementById('authScreen').style.display='none';document.getElementById('moreName').innerText=u.name;document.getElementById('moreEmail').innerText=u.email;document.getElementById('morePhone').innerText=u.phone;}}renderMarkets();updateBal();startPrice();})();
+function showP(p){
+ document.querySelectorAll('.phase').forEach(x=>x.classList.add('hidden'));
+ document.getElementById('p-'+p).classList.remove('hidden');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+ var nb=document.getElementById('n-'+p); if(nb)nb.classList.add('on');
+ if(p==='funds')upd();
+}
+function render(){
+ var h='';
+ for(var i=0;i<mk.length;i++){
+  var m=mk[i];
+  h+='<div onclick="openT(\''+m.n+'\')" class="card" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer"><div><b style="font-size:13px">'+m.n+'</b><br><span style="font-size:10px;opacity:.5">95% Payout • 0.7s</span></div><div style="text-align:right"><b id="pr-'+i+'">'+m.p.toFixed(2)+'</b><br><span style="font-size:11px;color:#22c55e">● LIVE</span></div></div>';
+ }
+ document.getElementById('mList').innerHTML=h;
+}
+function openT(s){
+ cS=s;
+ var m=mk.find(x=>x.n===s); cP=m.p;
+ document.getElementById('tSym').innerText=s;
+ document.getElementById('tPrice').innerText=cP.toFixed(2);
+ showP('trade');
+}
+function run(){
+ setInterval(function(){
+  cP+=(Math.random()-0.5)*1.8;
+  var tp=document.getElementById('tPrice');
+  if(tp){tp.innerText=cP.toFixed(2); tp.style.color=(Math.random()>0.5?'#22c55e':'#ef4444');}
+  for(var i=0;i<mk.length;i++){
+   mk[i].p+=(Math.random()-0.5)*0.8;
+   var el=document.getElementById('pr-'+i);
+   if(el)el.innerText=mk[i].p.toFixed(2);
+  }
+  var chart=document.getElementById('chart');
+  if(chart){
+   var d=document.createElement('div');
+   d.className='candle';
+   d.style.height=(15+Math.random()*45)+'px';
+   d.style.background=(Math.random()>0.5?'#22c55e':'#ef4444');
+   chart.appendChild(d);
+   if(chart.children.length>22) chart.removeChild(chart.children[0]);
+  }
+ },700);
+}
+function doT(dir){
+ var amt=parseFloat(document.getElementById('tAmt').value);
+ if(isNaN(amt)||amt<50){alert('Min KSh 50');return;}
+ if(amt>bal[cA]){alert('Low balance - Switch to DEMO or Deposit');return;}
+ bal[cA]-=amt; upd();
+ var entry=cP; var id=Date.now();
+ var div=document.createElement('div');
+ div.id='pos-'+id; div.className='card'; div.style.fontSize='12px';
+ div.innerText='⏳ '+dir.toUpperCase()+' '+cS+' KSh '+amt+' @ '+entry.toFixed(2)+' - 0.7s...';
+ document.getElementById('pos').appendChild(div);
+ setTimeout(function(){
+  var win=Math.random()>0.45;
+  var el=document.getElementById('pos-'+id);
+  if(win){bal[cA]+=amt*1.95; if(el){el.innerText='✅ WIN '+dir.toUpperCase()+' '+cS+' +KSh '+(amt*0.95).toFixed(0)+' | Exit '+cP.toFixed(2); el.style.border='1px solid #22c55e';}}
+  else{if(el){el.innerText='❌ LOSS '+dir.toUpperCase()+' '+cS+' -KSh '+amt+' | Exit '+cP.toFixed(2); el.style.border='1px solid #ef4444';}}
+  upd();
+ },700);
+}
+function upd(){
+ document.getElementById('bDemo').innerText='KSh '+bal.demo.toFixed(2);
+ document.getElementById('bReal').innerText='KSh '+bal.real.toFixed(2);
+ document.getElementById('balT').innerText='KSh '+(cA==='demo'?bal.demo:bal.real).toFixed(2);
+ document.getElementById('accL').innerText=cA.toUpperCase();
+ document.getElementById('rAct').className=cA==='real'?'':'hidden';
+}
+function swA(t){cA=t; document.getElementById('bD').className=t==='demo'?'btn btn-w':'btn btn-d'; document.getElementById('bR').className=t==='real'?'btn btn-w':'btn btn-d'; upd();}
+function openM(t){
+ document.getElementById('modal').classList.remove('hidden');
+ var ph=localStorage.getItem('apex_phone')||'07';
+ if(t==='dep'){
+  document.getElementById('mBox').innerHTML='<h3>Deposit via M-Pesa</h3><p style="font-size:10px;color:#22c55e">Min KSh 500</p><label style="font-size:11px;opacity:.6;margin-top:12px;display:block">Deposit FROM (Your M-Pesa Number)</label><input id="dPh" value="'+ph+'" class="inp" style="border:2px solid #22c55e55;text-align:center;font-weight:bold"><label style="font-size:11px;opacity:.6;margin-top:8px;display:block">Amount</label><input id="mAmt" type="number" value="500" class="inp" style="text-align:center;font-weight:900"><div id="eM" class="hidden" style="color:#f44;font-size:11px;text-align:center;margin-top:6px"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button onclick="closeM()" class="btn btn-d">Cancel</button><button onclick="doDep()" class="btn btn-g">DEPOSIT NOW</button></div>';
+ }else{
+  document.getElementById('mBox').innerHTML='<h3>Withdraw to M-Pesa</h3><input id="wPh" value="'+ph+'" class="inp" style="text-align:center;margin-top:12px"><input id="mAmt" type="number" value="500" class="inp" style="text-align:center"><div id="eM" class="hidden" style="color:#f44;font-size:11px;text-align:center"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button onclick="closeM()" class="btn btn-d">Cancel</button><button onclick="doWith()" class="btn btn-w">WITHDRAW</button></div>';
+ }
+}
+function closeM(){document.getElementById('modal').classList.add('hidden');}
+function doDep(){
+ var a=parseFloat(document.getElementById('mAmt').value);
+ var ph=document.getElementById('dPh').value.trim();
+ var er=document.getElementById('eM');
+ if(isNaN(a)||a<500){er.innerText='Min KSh 500';er.classList.remove('hidden');return;}
+ if(ph.length<10){er.innerText='Enter 07...';er.classList.remove('hidden');return;}
+ document.getElementById('mBox').innerHTML='<div style="text-align:center"><div style="width:60px;height:60px;background:#22c55e;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#000;font-size:28px">📱</div><h3 style="margin-top:10px">STK Push to '+ph+'</h3><p style="font-size:12px;opacity:.7">KSh '+a+' Paybill 522522</p><input id="mpCode" placeholder="M-Pesa Code e.g QH12.." class="inp" style="text-align:center;margin-top:14px"><button onclick="confDep('+a+',\''+ph+'\')" class="btn btn-w" style="margin-top:10px">I HAVE PAID - VERIFY</button></div>';
+}
+function confDep(a,ph){
+ var c=document.getElementById('mpCode').value.trim();
+ if(c.length<5){alert('Enter M-Pesa code');return;}
+ bal[cA]+=a; upd(); closeM(); alert('✅ KSh '+a+' added from '+ph);
+}
+function doWith(){
+ var a=parseFloat(document.getElementById('mAmt').value);
+ var ph=document.getElementById('wPh').value;
+ var er=document.getElementById('eM');
+ if(isNaN(a)||a<500||a>bal[cA]){er.innerText='Check amount/balance';er.classList.remove('hidden');return;}
+ bal[cA]-=a; upd(); closeM(); alert('Withdraw KSh '+a+' to '+ph+' - Processing');
+}
+
+(function(){
+ var cur=localStorage.getItem('apex_current');
+ if(cur){
+  var u=JSON.parse(localStorage.getItem('apex_users')||'[]');
+  var f=u.find(x=>x.email===cur);
+  if(f){document.getElementById('auth').style.display='none'; document.getElementById('mName').innerText=f.name; document.getElementById('mEmail').innerText=f.email; document.getElementById('mPh').innerText=f.phone;}
+ }
+ render(); upd(); run();
+})();
 </script>
-</body></html>
+</body>
+</html>
