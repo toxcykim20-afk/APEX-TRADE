@@ -1,116 +1,145 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Apex Trade</title>
+<title>Apex Trade - Sign Up</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-let MPESA_TILL="522522";
-let MPESA_ACC="APEX";
-function toLogin(){var n=document.getElementById('loginName').value;if(n.length<2){alert('Enter name');return;}localStorage.setItem('apex_name',n);document.getElementById('loginScreen').style.display='none';document.getElementById('moreName').innerText=n;showPhase('market');}
-function logout(){localStorage.clear();location.reload();}
+let MPESA_TILL="522522"; let MPESA_ACC="APEX";
+let accounts={demo:{bal:1000},real:{bal:0}}; let currentAcc='demo';
+
+function showAuth(t){
+ document.getElementById('signinBox').classList.add('hidden');
+ document.getElementById('signupBox').classList.add('hidden');
+ document.getElementById(t+'Box').classList.remove('hidden');
+}
+function doSignup(){
+ var name=document.getElementById('suName').value.trim();
+ var email=document.getElementById('suEmail').value.trim().toLowerCase();
+ var phone=document.getElementById('suPhone').value.trim();
+ var pass=document.getElementById('suPass').value;
+ var cpass=document.getElementById('suCpass').value;
+ var err=document.getElementById('suError');
+ if(!name||name.length<3){err.innerText='Enter full name';err.classList.remove('hidden');return;}
+ if(!email.includes('@')){err.innerText='Enter valid email';err.classList.remove('hidden');return;}
+ if(phone.length<10){err.innerText='Enter M-Pesa 07...';err.classList.remove('hidden');return;}
+ if(pass.length<6){err.innerText='Password min 6 chars';err.classList.remove('hidden');return;}
+ if(pass!==cpass){err.innerText='Passwords not matching';err.classList.remove('hidden');return;}
+
+ let users=JSON.parse(localStorage.getItem('apex_users')||'[]');
+ if(users.find(u=>u.email===email)){err.innerText='Email already registered - Sign In';err.classList.remove('hidden');return;}
+ users.push({name,email,phone,pass,created:Date.now()});
+ localStorage.setItem('apex_users',JSON.stringify(users));
+ localStorage.setItem('apex_current',email);
+ localStorage.setItem('apex_name',name);
+ localStorage.setItem('apex_phone',phone);
+ completeLogin(name,email,phone);
+ showToast('Account created!');
+}
+function doSignin(){
+ var email=document.getElementById('siEmail').value.trim().toLowerCase();
+ var pass=document.getElementById('siPass').value;
+ var err=document.getElementById('siError');
+ let users=JSON.parse(localStorage.getItem('apex_users')||'[]');
+ let user=users.find(u=>u.email===email && u.pass===pass);
+ if(!user){err.innerText='Wrong email or password';err.classList.remove('hidden');return;}
+ localStorage.setItem('apex_current',user.email);
+ localStorage.setItem('apex_name',user.name);
+ localStorage.setItem('apex_phone',user.phone);
+ completeLogin(user.name,user.email,user.phone);
+}
+function completeLogin(name,email,phone){
+ document.getElementById('authScreen').style.display='none';
+ document.getElementById('moreName').innerText=name;
+ document.getElementById('moreEmail').innerText=email;
+ document.getElementById('morePhone').innerText=phone;
+ document.getElementById('profName').value=name;
+ document.getElementById('profEmail').value=email;
+ document.getElementById('profPhone').value=phone;
+ showPhase('market');
+}
+function logout(){localStorage.removeItem('apex_current');localStorage.removeItem('apex_name');location.reload();}
 function showPhase(p){document.querySelectorAll('.phase').forEach(e=>e.classList.add('hidden'));document.getElementById('phase-'+p).classList.remove('hidden');}
 function showToast(m){var t=document.getElementById('toast');t.innerText=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3000);}
-function switchAcc(t){currentAcc=t;document.getElementById('balAcc').innerText='KSh '+accounts[t].bal.toFixed(2);document.getElementById('realActions').className=t==='real'?'mt-4':'hidden mt-4';}
+function switchAcc(t){currentAcc=t;document.getElementById('balAcc').innerText='KSh '+accounts[t].bal.toFixed(2);document.getElementById('realActions').className=t==='real'?'mt-4':'hidden mt-4';document.getElementById('demoBtn').className=t==='demo'?'flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]':'flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]';document.getElementById('realBtn').className=t==='real'?'flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]':'flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]';}
 function openModal(t){
- modalType=t;
  document.getElementById('modal').classList.remove('hidden');
  var box=document.getElementById('modalBox');
  if(t==='deposit'){
+  var savedPhone=localStorage.getItem('apex_phone')||'07';
   box.innerHTML=`
   <h3 class="font-black text-[15px]">Deposit via M-Pesa</h3>
-  <p class="text-[10px] text-[#22c55e] mt-1">Paybill ${MPESA_TILL} • Acc ${MPESA_ACC} • Min KSh 500</p>
-
-  <label class="text-[11px] opacity-60 mt-4 block">M-Pesa Number to deposit FROM</label>
-  <input id="depositPhone" type="tel" placeholder="07xx xxx xxx" value="07" class="w-full bg-black border-2 border-[#22c55e]/30 p-4 rounded-xl text-center font-bold text-[18px] mt-1 text-white">
-
-  <label class="text-[11px] opacity-60 mt-3 block">Amount (KSh)</label>
+  <p class="text-[10px] text-[#22c55e] mt-1">Paybill ${MPESA_TILL} • Acc ${MPESA_ACC}</p>
+  <label class="text-[11px] opacity-60 mt-4 block">Deposit FROM (Your M-Pesa Number)</label>
+  <input id="depositPhone" type="tel" value="${savedPhone}" class="w-full bg-black border-2 border-[#22c55e]/40 p-4 rounded-xl text-center font-bold text-[18px] mt-1">
+  <label class="text-[11px] opacity-60 mt-3 block">Amount KSh (Min 500)</label>
   <input id="modalAmount" type="number" value="500" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl text-center font-bold text-[18px] mt-1">
-
-  <div class="bg-[#22c55e]/10 border border-[#22c55e]/20 p-3 rounded-xl mt-3 text-[11px] text-left">
-  <b>How it works:</b><br>1. Click DEPOSIT below<br>2. You will get STK Push on <span id="phonePreview">07xx</span><br>3. Enter M-Pesa PIN to pay<br>4. Balance auto-credited
-  </div>
-
   <div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center font-bold"></div>
-  <div class="grid grid-cols-2 gap-2 mt-4">
-    <button onclick="closeModal()" class="bg-[#222] py-4 rounded-xl text-[12px]">Cancel</button>
-    <button onclick="sendStk()" class="bg-[#22c55e] text-black py-4 rounded-xl font-black text-[12px]">DEPOSIT NOW</button>
-  </div>`;
-  document.getElementById('depositPhone').addEventListener('input',function(){document.getElementById('phonePreview').innerText=this.value||'07xx';});
+  <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-4 rounded-xl">Cancel</button><button onclick="sendStk()" class="bg-[#22c55e] text-black py-4 rounded-xl font-black">DEPOSIT NOW</button></div>`;
  }else{
-  box.innerHTML=`
-  <h3 class="font-black">Withdraw to M-Pesa</h3>
-  <label class="text-[11px] opacity-60 mt-4 block">Withdraw TO Number</label>
-  <input id="withdrawPhone" type="tel" placeholder="07xx xxx xxx" value="07" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center font-bold mt-1">
-  <label class="text-[11px] opacity-60 mt-3 block">Amount</label>
-  <input id="modalAmount" type="number" value="500" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl text-center font-bold mt-1">
-  <div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center"></div>
-  <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-4 rounded-xl">Cancel</button><button onclick="doWithdraw()" class="bg-white text-black py-4 rounded-xl font-black">WITHDRAW</button></div>`;
+  box.innerHTML=`<h3 class="font-black">Withdraw to M-Pesa</h3><input id="withdrawPhone" type="tel" value="${localStorage.getItem('apex_phone')||'07'}" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center font-bold mt-4"><input id="modalAmount" type="number" value="500" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl text-center font-bold mt-3"><div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center"></div><div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-4 rounded-xl">Cancel</button><button onclick="doWithdraw()" class="bg-white text-black py-4 rounded-xl font-black">WITHDRAW</button></div>`;
  }
 }
 function closeModal(){document.getElementById('modal').classList.add('hidden');}
-
 function sendStk(){
- var amt=parseFloat(document.getElementById('modalAmount').value);
- var phone=document.getElementById('depositPhone').value.trim();
- var err=document.getElementById('errorMsg');
- if(!amt||amt<500){err.innerText='Min KSh 500';err.classList.remove('hidden');return;}
- if(phone.length<10 ||!phone.startsWith('07')){err.innerText='Enter valid M-Pesa 07...';err.classList.remove('hidden');return;}
-
- // SIMULATE STK PUSH
+ var amt=+document.getElementById('modalAmount').value; var phone=document.getElementById('depositPhone').value.trim(); var err=document.getElementById('errorMsg');
+ if(amt<500){err.innerText='Min KSh 500';err.classList.remove('hidden');return;}
+ if(phone.length<10){err.innerText='Enter valid 07...';err.classList.remove('hidden');return;}
  var box=document.getElementById('modalBox');
- box.innerHTML=`
- <div class="text-center py-4">
-   <div class="w-16 h-16 bg-[#22c55e] rounded-full mx-auto flex items-center justify-center text-black text-[30px] animate-pulse">📱</div>
-   <h3 class="font-black mt-4">STK Push Sent!</h3>
-   <p class="text-[12px] opacity-70 mt-2">Check your phone<br><b class="text-[#22c55e] text-[14px]">${phone}</b></p>
-   <p class="text-[11px] opacity-50 mt-2">Enter M-Pesa PIN to pay KSh ${amt}<br>to Paybill ${MPESA_TILL}</p>
-   <div class="mt-4 flex justify-center gap-1"><div class="w-2 h-2 bg-[#22c55e] rounded-full animate-bounce"></div><div class="w-2 h-2 bg-[#22c55e] rounded-full animate-bounce" style="animation-delay:0.2s"></div><div class="w-2 h-2 bg-[#22c55e] rounded-full animate-bounce" style="animation-delay:0.4s"></div></div>
-   <input id="mpesaCode" placeholder="Enter M-Pesa Code after paying e.g QH..." class="w-full bg-black border border-white/10 p-3 rounded-xl mt-6 text-center uppercase text-[12px]">
-   <button onclick="verifyStk(${amt},'${phone}')" class="w-full bg-white text-black py-4 rounded-xl font-black mt-3 text-[13px]">I HAVE PAID - VERIFY</button>
-   <button onclick="openModal('deposit')" class="w-full bg-[#222] py-3 rounded-xl mt-2 text-[11px]">Back</button>
- </div>`;
-
- // For real STK, here you call your backend:
- // fetch('https://your-backend.com/stkpush', {method:'POST', body: JSON.stringify({phone, amount: amt})})
+ box.innerHTML=`<div class="text-center py-4"><div class="w-16 h-16 bg-[#22c55e] rounded-full mx-auto flex items-center justify-center text-black text-[30px] animate-pulse">📱</div><h3 class="font-black mt-4">STK Push Sent to ${phone}</h3><p class="text-[12px] opacity-70 mt-2">Enter PIN: KSh ${amt} to Paybill ${MPESA_TILL}</p><input id="mpesaCode" placeholder="M-Pesa Code e.g QH..." class="w-full bg-black border border-white/10 p-3 rounded-xl mt-6 text-center uppercase text-[12px]"><button onclick="verifyStk(${amt},'${phone}')" class="w-full bg-white text-black py-4 rounded-xl font-black mt-3">VERIFY PAYMENT</button></div>`;
 }
-
-function verifyStk(amt, phone){
- var code=document.getElementById('mpesaCode').value.trim();
- if(code.length<6){alert('Enter M-Pesa code from SMS after paying');return;}
- accounts[currentAcc].bal+=amt;
- switchAcc(currentAcc);
- closeModal();
- showToast('KSh '+amt+' deposited from '+phone);
- console.log('NEW DEPOSIT: '+amt+' Phone:'+phone+' Code:'+code);
-}
-
-function doWithdraw(){
- var amt=parseFloat(document.getElementById('modalAmount').value);
- var phone=document.getElementById('withdrawPhone').value.trim();
- if(amt<500||amt>accounts[currentAcc].bal){document.getElementById('errorMsg').innerText='Check amount/balance';document.getElementById('errorMsg').classList.remove('hidden');return;}
- accounts[currentAcc].bal-=amt; switchAcc(currentAcc); closeModal(); showToast('Withdraw KSh '+amt+' to '+phone+' - processing');
-}
+function verifyStk(amt,phone){var code=document.getElementById('mpesaCode').value.trim(); if(code.length<6){alert('Enter M-Pesa code');return;} accounts[currentAcc].bal+=amt; switchAcc(currentAcc); closeModal(); showToast('KSh '+amt+' credited from '+phone);}
+function doWithdraw(){var amt=+document.getElementById('modalAmount').value; var phone=document.getElementById('withdrawPhone').value; if(amt<500||amt>accounts[currentAcc].bal){document.getElementById('errorMsg').innerText='Check balance';document.getElementById('errorMsg').classList.remove('hidden');return;} accounts[currentAcc].bal-=amt; switchAcc(currentAcc); closeModal(); showToast('Withdraw KSh '+amt+' to '+phone);}
 </script>
 </head>
 <body class="bg-black text-white">
-<div class="max-w-[430px] mx-auto min-h-screen flex flex-col bg-black relative">
-<div id="loginScreen" style="position:fixed;inset:0;background:black;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
-<b class="text-[22px] tracking-[3px]">APEX TRADE</b>
-<p class="text-[10px] opacity-50 mb-6">Min KSh 500 • 95% Payout</p>
-<input id="loginName" placeholder="Full Name" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
-<input id="loginEmail" placeholder="Email" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-4">
-<button onclick="toLogin()" class="w-full bg-white text-black py-4 rounded-xl font-black">LOGIN →</button>
+<div class="max-w-[430px] mx-auto min-h-screen flex flex-col bg-black">
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" style="position:fixed;inset:0;background:black;z-index:100;overflow:auto;padding:24px">
+<div class="text-center mt-8 mb-6"><div class="w-20 h-20 bg-[#111] rounded-3xl flex items-center justify-center text-[36px] mx-auto">₿↗</div><b class="text-[22px] tracking-[3px] block mt-3">APEX TRADE</b><p class="text-[10px] opacity-50 mt-1">Min KSh 500 • 95% Payout • 0.7s</p></div>
+
+<!-- SIGN IN -->
+<div id="signinBox">
+<h2 class="font-black text-[20px] mb-4">Sign In</h2>
+<input id="siEmail" type="email" placeholder="Email" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<input id="siPass" type="password" placeholder="Password" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<div id="siError" class="hidden text-[11px] text-[#ef4444] mb-3 text-center font-bold"></div>
+<button onclick="doSignin()" class="w-full bg-white text-black py-4 rounded-xl font-black">SIGN IN →</button>
+<p class="text-[12px] text-center mt-4 opacity-60">No account? <button onclick="showAuth('signup')" class="text-[#0a84ff] font-bold">Sign Up</button></p>
 </div>
-<div id="phase-market" class="phase flex-1 p-4"><h2 class="font-bold mb-4">Popular Markets</h2><div id="marketList"></div><button onclick="showPhase('trade')" class="w-full bg-[#151515] p-3 rounded-xl mt-4">Open Chart (XAUUSD 4424)</button></div>
-<div id="phase-trade" class="phase hidden flex-1 p-4"><button onclick="showPhase('market')">← Back</button><div class="h-[250px] bg-[#111] rounded-xl mt-4 flex items-center justify-center opacity-30">Chart - XAUUSD</div><div class="grid grid-cols-2 gap-2 mt-4"><button class="bg-[#22c55e] py-4 rounded-xl font-black text-black">BUY</button><button class="bg-[#ef4444] py-4 rounded-xl font-black">SELL</button></div></div>
-<div id="phase-funds" class="phase hidden flex-1 p-4"><h2 class="font-bold text-[18px]">Funds</h2><div class="bg-[#111] rounded-xl p-4 mt-4"><div class="flex gap-2 mb-4"><button onclick="switchAcc('demo')" id="demoBtn" class="flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]">DEMO</button><button onclick="switchAcc('real')" id="realBtn" class="flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]">REAL</button></div><b id="balAcc" class="text-[28px]">KSh 1,000.00</b><div id="realActions" class="hidden mt-4"><button onclick="openModal('deposit')" class="w-full bg-white text-black py-4 rounded-xl font-black text-[13px]">Deposit M-Pesa - Enter Phone</button><button onclick="openModal('withdraw')" class="w-full bg-[#222] py-3 rounded-xl mt-2 text-[12px]">Withdraw</button></div></div></div>
-<div id="phase-more" class="phase hidden flex-1 p-4"><b id="moreName">Guest</b><div class="mt-6 space-y-2"><button onclick="showPhase('funds')" class="w-full bg-[#151515] p-4 rounded-xl text-left">💰 Funds</button><button onclick="logout()" class="w-full bg-[#151515] p-4 rounded-xl">Logout</button></div></div>
-<div class="grid grid-cols-4 bg-black border-t border-white/10 text-[11px] py-2"><button onclick="showPhase('market')" class="flex flex-col items-center">📈<br>Trade</button><button onclick="showPhase('funds')" class="flex flex-col items-center">💰<br>Funds</button><button onclick="showPhase('more')" class="flex flex-col items-center">⋯<br>More</button><button onclick="showPhase('market')" class="flex flex-col items-center opacity-50">📅<br>Calendar</button></div>
+
+<!-- SIGN UP -->
+<div id="signupBox" class="hidden">
+<h2 class="font-black text-[20px] mb-4">Create Account</h2>
+<input id="suName" placeholder="Full Name e.g Amos Kimungetich" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<input id="suEmail" type="email" placeholder="Email e.g amos@gmail.com" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<input id="suPhone" type="tel" placeholder="M-Pesa Phone 07..." class="w-full bg-[#111] border-2 border-[#22c55e]/20 p-4 rounded-xl mb-3">
+<input id="suPass" type="password" placeholder="Password (min 6 chars)" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<input id="suCpass" type="password" placeholder="Confirm Password" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<div id="suError" class="hidden text-[11px] text-[#ef4444] mb-3 text-center font-bold"></div>
+<button onclick="doSignup()" class="w-full bg-[#22c55e] text-black py-4 rounded-xl font-black">SIGN UP →</button>
+<p class="text-[12px] text-center mt-4 opacity-60">Have account? <button onclick="showAuth('signin')" class="text-[#0a84ff] font-bold">Sign In</button></p>
+<p class="text-[9px] opacity-30 text-center mt-4">Demo simulator only - 18+</p>
+</div>
+</div>
+
+<!-- APP -->
+<div id="phase-market" class="phase flex-1 p-4"><h2 class="font-bold mb-4">Popular Markets</h2><div class="bg-[#151515] p-4 rounded-xl flex justify-between"><b>XAUUSD</b><span>4424.6</span></div><button onclick="showPhase('trade')" class="w-full bg-[#222] p-3 rounded-xl mt-4 text-[12px]">Open Chart</button></div>
+<div id="phase-trade" class="phase hidden flex-1 p-4"><button onclick="showPhase('market')">← Back</button><div class="h-[250px] bg-[#111] rounded-xl mt-4 flex items-center justify-center">Chart</div></div>
+<div id="phase-funds" class="phase hidden flex-1 p-4"><h2 class="font-bold text-[18px]">Funds</h2><div class="bg-[#111] rounded-xl p-4 mt-4"><div class="flex gap-2 mb-4"><button onclick="switchAcc('demo')" id="demoBtn" class="flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]">DEMO</button><button onclick="switchAcc('real')" id="realBtn" class="flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]">REAL</button></div><b id="balAcc" class="text-[28px]">KSh 1,000.00</b><div id="realActions" class="hidden mt-4"><button onclick="openModal('deposit')" class="w-full bg-white text-black py-4 rounded-xl font-black text-[13px]">Deposit - Enter Phone Number</button><button onclick="openModal('withdraw')" class="w-full bg-[#222] py-3 rounded-xl mt-2 text-[12px]">Withdraw</button></div></div></div>
+<div id="phase-more" class="phase hidden flex-1 p-4"><div class="text-center"><b id="moreName" class="text-[20px] block">Guest</b><div id="moreEmail" class="text-[12px] opacity-50"></div><div id="morePhone" class="text-[12px] text-[#22c55e] mt-1"></div></div><div class="mt-6 space-y-2"><div class="bg-[#111] p-4 rounded-xl"><b class="text-[12px]">Profile</b><input id="profName" class="w-full bg-black border border-white/10 p-2 rounded-lg mt-2 text-[12px]"><input id="profEmail" class="w-full bg-black border border-white/10 p-2 rounded-lg mt-2 text-[12px]"><input id="profPhone" class="w-full bg-black border border-white/10 p-2 rounded-lg mt-2 text-[12px]"></div><button onclick="logout()" class="w-full bg-[#151515] p-4 rounded-xl">Logout</button></div></div>
+
+<div class="grid grid-cols-4 bg-black border-t border-white/10 text-[11px] py-2"><button onclick="showPhase('market')" class="flex flex-col items-center">📈<br>Trade</button><button onclick="showPhase('funds')" class="flex flex-col items-center">💰<br>Funds</button><button onclick="showPhase('more')" class="flex flex-col items-center">⋯<br>More</button><button onclick="showPhase('market')" class="flex flex-col items-center opacity-50">📅<br>Cal</button></div>
 </div>
 <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div id="modalBox" class="bg-[#111] w-full max-w-[360px] rounded-2xl p-5"></div></div>
 <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#22c55e] text-black px-6 py-3 rounded-full text-[12px] font-bold z-[200]">Done</div>
 <script>
-let accounts={demo:{bal:1000},real:{bal:0}}, currentAcc='demo', modalType='deposit';
-let symbols=[{s:'XAUUSD',price:4424},{s:'BTCUSD',price:79842}];
-function renderMarket(){let h='';symbols.forEach(i=>{h+=`<div class="flex justify-between py-3 border-b border-white/5"><b>${i.s}</b><span>${i.price}</span></div>`;});document.getElementById('marketList').innerHTML=h;}
-renderMarket(); (function(){let n=localStorage.getItem('apex_name');if(n){document.getElementById('loginScreen').style.display='none';document.getElementById('moreName').innerText=n;}})();showPhase('market');switchAcc('demo');
+(function(){
+ var cur=localStorage.getItem('apex_current');
+ if(cur){
+  var users=JSON.parse(localStorage.getItem('apex_users')||'[]');
+  var u=users.find(x=>x.email===cur);
+  if(u){document.getElementById('authScreen').style.display='none'; document.getElementById('moreName').innerText=u.name; document.getElementById('moreEmail').innerText=u.email; document.getElementById('morePhone').innerText=u.phone;}
+ }
+})();
+showPhase('market');switchAcc('demo');
 </script></body></html>
