@@ -1,3 +1,140 @@
-<input id="suName" placeholder="Full Name" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
-<input id="suEmail" type="email" placeholder="Email address" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
-<input id="suPhone" type="tel" placeholder="M-Pesa Phone 07..." class="w-full bg-[#111] border-2 border-[#22c55e]/20 p-4 rounded-xl mb-3">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apex Trade</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#000;color:#fff}
+.wrap{max-width:430px;margin:0 auto;min-height:100vh;background:#000;display:flex;flex-direction:column}
+.input{width:100%;background:#111;border:1px solid #222;padding:16px;border-radius:12px;color:#fff;margin-bottom:12px;font-size:14px}
+.input-green{border:2px solid #22c55e33}
+.btn{width:100%;padding:16px;border-radius:12px;border:0;font-weight:900;font-size:14px;cursor:pointer}
+.btn-white{background:#fff;color:#000}
+.btn-green{background:#22c55e;color:#000}
+.btn-dark{background:#222;color:#fff}
+.card{background:#111;border-radius:16px;padding:16px;margin-top:16px}
+.phase{flex:1;padding:20px}
+.hidden{display:none!important}
+.error{color:#ef4444;font-size:11px;text-align:center;margin-bottom:10px;font-weight:bold}
+.top-logo{width:80px;height:80px;background:#111;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #222;padding:8px 0;font-size:11px;text-align:center}
+.nav button{background:0;border:0;color:#fff;opacity:.6}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px;z-index:999}
+.modal-box{background:#111;width:100%;max-width:360px;border-radius:20px;padding:20px}
+</style>
+<script>
+let MPESA_TILL="522522",MPESA_ACC="APEX";
+let accounts={demo:{bal:1000},real:{bal:0}},currentAcc='demo';
+function showAuth(t){
+ document.getElementById('signinBox').classList.add('hidden');
+ document.getElementById('signupBox').classList.add('hidden');
+ document.getElementById(t+'Box').classList.remove('hidden');
+}
+function doSignup(){
+ let n=document.getElementById('suName').value.trim();
+ let e=document.getElementById('suEmail').value.trim().toLowerCase();
+ let p=document.getElementById('suPhone').value.trim();
+ let pw=document.getElementById('suPass').value;
+ let cp=document.getElementById('suCpass').value;
+ let err=document.getElementById('suError');
+ if(n.length<3){err.innerText='Enter full name';err.classList.remove('hidden');return;}
+ if(!e.includes('@')){err.innerText='Enter valid email';err.classList.remove('hidden');return;}
+ if(p.length<10){err.innerText='Enter M-Pesa 07...';err.classList.remove('hidden');return;}
+ if(pw.length<6){err.innerText='Password min 6';err.classList.remove('hidden');return;}
+ if(pw!==cp){err.innerText='Passwords not match';err.classList.remove('hidden');return;}
+ let users=JSON.parse(localStorage.getItem('apex_users')||'[]');
+ if(users.find(u=>u.email===e)){err.innerText='Email exists - Sign In';err.classList.remove('hidden');return;}
+ users.push({name:n,email:e,phone:p,pass:pw});
+ localStorage.setItem('apex_users',JSON.stringify(users));
+ localStorage.setItem('apex_current',e);
+ localStorage.setItem('apex_name',n);
+ localStorage.setItem('apex_phone',p);
+ completeLogin(n,e,p);
+}
+function doSignin(){
+ let e=document.getElementById('siEmail').value.trim().toLowerCase();
+ let pw=document.getElementById('siPass').value;
+ let err=document.getElementById('siError');
+ let users=JSON.parse(localStorage.getItem('apex_users')||'[]');
+ let u=users.find(x=>x.email===e && x.pass===pw);
+ if(!u){err.innerText='Wrong email or password';err.classList.remove('hidden');return;}
+ localStorage.setItem('apex_current',u.email);
+ localStorage.setItem('apex_name',u.name);
+ localStorage.setItem('apex_phone',u.phone);
+ completeLogin(u.name,u.email,u.phone);
+}
+function completeLogin(name,email,phone){
+ document.getElementById('authScreen').style.display='none';
+ document.getElementById('moreName').innerText=name;
+ document.getElementById('moreEmail').innerText=email;
+ document.getElementById('morePhone').innerText=phone;
+ showPhase('market');
+}
+function logout(){localStorage.removeItem('apex_current');location.reload();}
+function showPhase(p){document.querySelectorAll('.phase').forEach(e=>e.classList.add('hidden'));document.getElementById('phase-'+p).classList.remove('hidden');}
+function switchAcc(t){currentAcc=t;document.getElementById('balAcc').innerText='KSh '+accounts[t].bal.toFixed(2);document.getElementById('realActions').className=t==='real'?'':'hidden';}
+function openModal(t){
+ document.getElementById('modal').classList.remove('hidden');
+ let box=document.getElementById('modalBox');
+ let savedPhone=localStorage.getItem('apex_phone')||'07';
+ if(t==='deposit'){
+  box.innerHTML=`<h3 style="font-weight:900">Deposit via M-Pesa</h3><p style="font-size:10px;color:#22c55e;margin-top:4px">Paybill ${MPESA_TILL} Acc ${MPESA_ACC} Min 500</p><label style="font-size:11px;opacity:.6;margin-top:16px;display:block">Deposit FROM (Your M-Pesa Number)</label><input id="depositPhone" type="tel" value="${savedPhone}" class="input input-green" style="text-align:center;font-weight:bold;font-size:18px;margin-top:4px"><label style="font-size:11px;opacity:.6;margin-top:12px;display:block">Amount KSh</label><input id="modalAmount" type="number" value="500" class="input" style="text-align:center;font-weight:bold;margin-top:4px"><div id="errorMsg" class="hidden error"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px"><button onclick="closeModal()" class="btn btn-dark">Cancel</button><button onclick="sendStk()" class="btn btn-green">DEPOSIT NOW</button></div>`;
+ }else{
+  box.innerHTML=`<h3 style="font-weight:900">Withdraw</h3><input id="withdrawPhone" type="tel" value="${savedPhone}" class="input" style="margin-top:16px;text-align:center"><input id="modalAmount" type="number" value="500" class="input" style="text-align:center"><div id="errorMsg" class="hidden error"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px"><button onclick="closeModal()" class="btn btn-dark">Cancel</button><button onclick="doWithdraw()" class="btn btn-white">WITHDRAW</button></div>`;
+ }
+}
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
+function sendStk(){
+ let amt=+document.getElementById('modalAmount').value;
+ let phone=document.getElementById('depositPhone').value.trim();
+ let err=document.getElementById('errorMsg');
+ if(amt<500){err.innerText='Min KSh 500';err.classList.remove('hidden');return;}
+ if(phone.length<10){err.innerText='Enter 07...';err.classList.remove('hidden');return;}
+ document.getElementById('modalBox').innerHTML=`<div style="text-align:center;padding:16px"><div style="width:64px;height:64px;background:#22c55e;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#000;font-size:30px">📱</div><h3 style="font-weight:900;margin-top:16px">STK Push Sent to ${phone}</h3><p style="font-size:12px;opacity:.7;margin-top:8px">Enter M-Pesa PIN to pay KSh ${amt}<br>Paybill ${MPESA_TILL}</p><input id="mpesaCode" placeholder="M-Pesa Code e.g QH12..." class="input" style="margin-top:24px;text-align:center"><button onclick="verifyStk(${amt},'${phone}')" class="btn btn-white" style="margin-top:12px">I HAVE PAID - VERIFY</button></div>`;
+}
+function verifyStk(amt,phone){let c=document.getElementById('mpesaCode').value.trim(); if(c.length<6){alert('Enter M-Pesa code');return;} accounts[currentAcc].bal+=amt; switchAcc(currentAcc); closeModal(); alert('KSh '+amt+' credited from '+phone);}
+function doWithdraw(){let amt=+document.getElementById('modalAmount').value; let phone=document.getElementById('withdrawPhone').value; if(amt<500||amt>accounts[currentAcc].bal){document.getElementById('errorMsg').innerText='Check amount/balance';document.getElementById('errorMsg').classList.remove('hidden');return;} accounts[currentAcc].bal-=amt; switchAcc(currentAcc); closeModal(); alert('Withdraw KSh '+amt+' to '+phone);}
+</script>
+</head>
+<body>
+<div class="wrap">
+<div id="authScreen" style="position:fixed;inset:0;background:#000;z-index:100;overflow:auto;padding:24px">
+<div style="text-align:center;margin-top:30px;margin-bottom:24px"><div class="top-logo">₿↗</div><b style="letter-spacing:3px;font-size:22px;display:block;margin-top:12px">APEX TRADE</b><p style="font-size:10px;opacity:.5;margin-top:4px">Min KSh 500 • 95% Payout • 0.7s</p></div>
+
+<div id="signinBox">
+<h2 style="font-weight:900;font-size:20px;margin-bottom:16px">Sign In</h2>
+<input id="siEmail" type="email" placeholder="Email address" class="input">
+<input id="siPass" type="password" placeholder="Password" class="input">
+<div id="siError" class="hidden error"></div>
+<button onclick="doSignin()" class="btn btn-white">SIGN IN →</button>
+<p style="font-size:12px;text-align:center;margin-top:16px;opacity:.6">No account? <button onclick="showAuth('signup')" style="color:#0a84ff;background:0;border:0;font-weight:bold">Sign Up</button></p>
+</div>
+
+<div id="signupBox" class="hidden">
+<h2 style="font-weight:900;font-size:20px;margin-bottom:16px">Create Account</h2>
+<input id="suName" placeholder="Full Name" class="input">
+<input id="suEmail" type="email" placeholder="Email address" class="input">
+<input id="suPhone" type="tel" placeholder="M-Pesa Phone 07..." class="input input-green">
+<input id="suPass" type="password" placeholder="Password (min 6 chars)" class="input">
+<input id="suCpass" type="password" placeholder="Confirm Password" class="input">
+<div id="suError" class="hidden error"></div>
+<button onclick="doSignup()" class="btn btn-green">SIGN UP →</button>
+<p style="font-size:12px;text-align:center;margin-top:16px;opacity:.6">Have account? <button onclick="showAuth('signin')" style="color:#0a84ff;background:0;border:0;font-weight:bold">Sign In</button></p>
+</div>
+</div>
+
+<div id="phase-market" class="phase"><h2 style="font-weight:900">Popular Markets</h2><div class="card" style="display:flex;justify-content:space-between"><b>XAUUSD</b><span>4424.6</span></div><div class="card" style="display:flex;justify-content:space-between"><b>BTCUSD</b><span>79842</span></div><button onclick="showPhase('funds')" class="btn btn-dark" style="margin-top:20px">Go to Funds → Deposit</button></div>
+<div id="phase-funds" class="phase hidden"><h2 style="font-weight:900;font-size:18px">Funds</h2><div class="card"><div style="display:flex;gap:8px;margin-bottom:16px"><button onclick="switchAcc('demo')" class="btn btn-white" style="flex:1;padding:10px;font-size:11px">DEMO</button><button onclick="switchAcc('real')" class="btn btn-dark" style="flex:1;padding:10px;font-size:11px">REAL</button></div><b id="balAcc" style="font-size:28px">KSh 1,000.00</b><div id="realActions" class="hidden" style="margin-top:16px"><button onclick="openModal('deposit')" class="btn btn-white">Deposit - Enter Phone Number</button><button onclick="openModal('withdraw')" class="btn btn-dark" style="margin-top:8px">Withdraw</button></div></div></div>
+<div id="phase-more" class="phase hidden"><div style="text-align:center"><b id="moreName" style="font-size:20px;display:block">Guest</b><div id="moreEmail" style="font-size:12px;opacity:.5"></div><div id="morePhone" style="font-size:12px;color:#22c55e;margin-top:4px"></div></div><button onclick="logout()" class="btn btn-dark" style="margin-top:24px">Logout</button></div>
+
+<div class="nav"><button onclick="showPhase('market')">📈<br>Trade</button><button onclick="showPhase('funds')">💰<br>Funds</button><button onclick="showPhase('more')">⋯<br>More</button><button onclick="showPhase('market')">📅<br>Cal</button></div>
+</div>
+<div id="modal" class="hidden modal"><div id="modalBox" class="modal-box"></div></div>
+<script>
+(function(){let cur=localStorage.getItem('apex_current'); if(cur){let users=JSON.parse(localStorage.getItem('apex_users')||'[]'); let u=users.find(x=>x.email===cur); if(u){document.getElementById('authScreen').style.display='none'; document.getElementById('moreName').innerText=u.name; document.getElementById('moreEmail').innerText=u.email; document.getElementById('morePhone').innerText=u.phone;}}})();
+showPhase('market');switchAcc('demo');
+</script>
+</body>
+</html>
