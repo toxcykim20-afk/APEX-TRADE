@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f172a">
-<title>APEX TRADE - Legit Trading Platform</title>
+<title>APEX TRADE - Legit</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#0f172a;color:#fff;min-height:100vh}
 .header{background:#1e293b;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20}
 .logo{font-weight:900;color:#22c55e;font-size:20px}
 .balance{background:#22c55e;color:#000;padding:6px 12px;border-radius:20px;font-weight:700;font-size:13px}
-.auth-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:20px;background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%)}
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:20px;background:linear-gradient(180deg,#0f172a,#1e293b)}
 .auth-card{background:#1e293b;border-radius:16px;padding:24px;border:1px solid #334155;max-width:400px;margin:0 auto;width:100%}
 .auth-tabs{display:flex;background:#0f172a;border-radius:10px;padding:4px;margin-bottom:20px}
-.auth-tabs div{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-weight:600}
+.auth-tabs div{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-weight:700}
 .auth-tabs div.active{background:#22c55e;color:#000}
 .input{width:100%;padding:14px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;margin:8px 0;font-size:15px}
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-weight:800;font-size:16px;cursor:pointer;margin-top:12px}
 .btn-buy{background:#22c55e;color:#000}
-.install-banner{background:#22c55e;color:#000;text-align:center;padding:10px;font-weight:800;font-size:13px}
+.install-banner{background:#22c55e;color:#000;text-align:center;padding:10px;font-weight:800;font-size:13px;cursor:pointer}
 .nav{display:flex;background:#1e293b;border-top:1px solid #334155;position:fixed;bottom:0;left:0;right:0;z-index:20}
 .nav div{flex:1;text-align:center;padding:12px 0;font-size:11px;cursor:pointer;color:#94a3b8}
 .nav div.active{color:#22c55e;border-top:2px solid #22c55e}
@@ -33,92 +33,61 @@ body{background:#0f172a;color:#fff;min-height:100vh}
 </head>
 <body>
 <div id="authScreen" class="auth-wrap">
-<div style="text-align:center;margin-bottom:20px">
-<div style="font-size:42px;font-weight:900;color:#22c55e">APEX TRADE</div>
-<div class="small">Kenya's Legit Trading Platform • Licensed Demo</div>
-<div style="margin-top:12px"><span class="badge">✓ SECURE</span> <span class="badge">✓ MPESA</span> <span class="badge">✓ INSTANT</span></div>
-</div>
+<div style="text-align:center;margin-bottom:20px"><div style="font-size:42px;font-weight:900;color:#22c55e">APEX TRADE</div><div class="small">Kenya's Legit Trading Platform • Licensed Demo</div></div>
 <div class="auth-card">
-<div class="auth-tabs">
-<div id="tabLogin" class="active" onclick="switchAuth('login')">Sign In</div>
-<div id="tabSignup" onclick="switchAuth('signup')">Sign Up</div>
-</div>
-<div id="loginForm">
-<input id="loginEmail" class="input" type="email" placeholder="Email address">
-<input id="loginPass" class="input" type="password" placeholder="Password">
-<button class="btn btn-buy" onclick="doLogin()">Sign In & Trade</button>
-</div>
-<div id="signupForm" style="display:none">
-<input id="suName" class="input" type="text" placeholder="Full Name">
-<input id="suEmail" class="input" type="email" placeholder="Email address">
-<input id="suPhone" class="input" type="tel" placeholder="MPESA Phone (07...)">
-<input id="suPass" class="input" type="password" placeholder="Create Password (min 4)">
-<button class="btn btn-buy" onclick="doSignup()">Create Account - Get KSh 1,000 Demo</button>
-</div>
-<div id="authMsg" class="small" style="text-align:center;margin-top:12px;color:#fbbf24"></div>
+<div class="auth-tabs"><div id="tabLogin" class="active" onclick="switchAuth('login')">Sign In</div><div id="tabSignup" onclick="switchAuth('signup')">Sign Up</div></div>
+<div id="loginForm"><input id="loginEmail" class="input" type="email" placeholder="Email address"><input id="loginPass" class="input" type="password" placeholder="Password"><button class="btn btn-buy" onclick="doLogin()">Sign In & Trade</button></div>
+<div id="signupForm" style="display:none"><input id="suName" class="input" type="text" placeholder="Full Name"><input id="suEmail" class="input" type="email" placeholder="Email address"><input id="suPhone" class="input" type="tel" placeholder="MPESA Phone 07..."><input id="suPass" class="input" type="password" placeholder="Create Password min 4"><button class="btn btn-buy" onclick="doSignup()">Create Account - Get KSh 1,000 Demo</button></div>
+<div id="authMsg" class="small" style="text-align:center;margin-top:12px;color:#fbbf24;min-height:18px"></div>
 </div>
 </div>
-
 <div id="mainApp" style="display:none">
 <div class="install-banner" onclick="installApp()">📲 TAP TO INSTALL APP TO YOUR SCREEN</div>
-<div class="header">
-<div><div class="logo">APEX TRADE</div><div class="small" id="userName">Trader</div></div>
-<div style="display:flex;gap:8px;align-items:center"><div class="balance" id="bal">KSh 1,000</div><button onclick="logout()" style="background:#334155;border:none;color:#fff;padding:6px 10px;border-radius:8px;font-size:12px">Logout</button></div>
-</div>
-<div class="page" id="tradePage">
-<div class="card"><div style="display:flex;justify-content:space-between"><span><b>GOLD / USD</b> <span class="badge">LIVE</span></span><span id="change" style="color:#22c55e">+1.24%</span></div><div class="price" id="price">$2,045.30</div><div id="chart" style="height:100px;background:linear-gradient(to top,#22c55e22,transparent);border-radius:8px;margin:10px 0;display:flex;align-items:end;gap:2px;padding:6px"></div><div class="grid2"><button class="btn btn-buy" onclick="trade('buy')">BUY ▲</button><button class="btn" style="background:#ef4444;color:#fff" onclick="trade('sell')">SELL ▼</button></div></div>
-<div class="card"><b>Open Positions: <span id="tradesCount">0</span></b><div id="trades" style="margin-top:8px"></div></div>
-<div class="card"><b>Account Verified ✓</b><br><span class="small">ID: <span id="accId"></span> • Balance: <span class="balText">KSh 1,000</span></span></div>
-</div>
-<div class="page" id="fundsPage" style="display:none">
-<div class="card"><h3>Deposit - MPESA</h3><p class="small" style="margin:8px 0">Paybill: <b>522533</b><br>Account: <b>7864202</b></p><input id="depAmt" class="input" type="number" placeholder="Amount KSh"><button class="btn btn-buy" onclick="deposit()">Confirm Deposit (Demo)</button></div>
-<div class="card"><h3>Withdraw</h3><input class="input" placeholder="MPESA Number"><input class="input" type="number" placeholder="Amount"><button class="btn" style="background:#334155;color:#fff" onclick="alert('Demo: Withdrawal in real version to MPESA')">Request</button></div>
-</div>
-<div class="page" id="morePage" style="display:none">
-<div class="card"><button class="btn btn-buy" onclick="installApp()">📲 Install to Home Screen</button></div>
-<div class="card"><b>Share & Earn</b><br><small style="color:#60a5fa">https://toxcykim20-afk.github.io/APEX-TRADE/</small><br><button class="btn" style="background:#25D366;color:#fff" onclick="shareWA()">Share on WhatsApp</button></div>
-<div class="card"><b>Profile</b><br><span class="small">Name: <span id="pName"></span><br>Email: <span id="pEmail"></span><br>Phone: <span id="pPhone"></span></span></div>
-</div>
+<div class="header"><div><div class="logo">APEX TRADE</div><div class="small" id="userName">Trader</div></div><div style="display:flex;gap:8px;align-items:center"><div class="balance" id="bal">KSh 1,000</div><button onclick="logout()" style="background:#334155;border:none;color:#fff;padding:6px 10px;border-radius:8px;font-size:12px">Logout</button></div></div>
+<div class="page" id="tradePage"><div class="card"><div style="display:flex;justify-content:space-between"><span><b>GOLD / USD</b> <span class="badge">LIVE</span></span><span id="change" style="color:#22c55e">+1.24%</span></div><div class="price" id="price">$2,045.30</div><div id="chart" style="height:100px;background:linear-gradient(to top,#22c55e22,transparent);border-radius:8px;margin:10px 0;display:flex;align-items:end;gap:2px;padding:6px"></div><div class="grid2"><button class="btn btn-buy" onclick="trade('buy')">BUY ▲</button><button class="btn" style="background:#ef4444;color:#fff" onclick="trade('sell')">SELL ▼</button></div></div><div class="card"><b>Open Positions: <span id="tradesCount">0</span></b><div id="trades" style="margin-top:8px"></div></div></div>
+<div class="page" id="fundsPage" style="display:none"><div class="card"><h3>Deposit - MPESA</h3><p class="small">Paybill: <b>522533</b> Acc: <b>7864202</b></p><input id="depAmt" class="input" type="number" placeholder="Amount KSh"><button class="btn btn-buy" onclick="deposit()">Confirm Deposit</button></div></div>
+<div class="page" id="morePage" style="display:none"><div class="card"><button class="btn btn-buy" onclick="installApp()">📲 Install to Home Screen</button></div><div class="card"><b>Share</b><br><small style="color:#60a5fa">https://toxcykim20-afk.github.io/APEX-TRADE/</small><br><button class="btn" style="background:#25D366;color:#fff" onclick="shareWA()">Share WhatsApp</button></div><div class="card"><b>Profile</b><br><span class="small">Name: <span id="pName"></span><br>Email: <span id="pEmail"></span></span></div></div>
 <div class="nav"><div id="n1" class="active" onclick="showPage('trade')">📈<br>Trade</div><div id="n2" onclick="showPage('funds')">💰<br>Funds</div><div id="n3" onclick="showPage('more')">☰<br>More</div></div>
 </div>
-
 <script>
-let currentUser=JSON.parse(localStorage.getItem('apex_current')||'null');
-let users=JSON.parse(localStorage.getItem('apex_users')||'[]');
-function switchAuth(t){document.getElementById('tabLogin').className=t=='login'?'active':'';document.getElementById('tabSignup').className=t=='signup'?'active':'';document.getElementById('loginForm').style.display=t=='login'?'block':'none';document.getElementById('signupForm').style.display=t=='signup'?'block':'none';document.getElementById('authMsg').textContent=''}
+let price=2045.30;let bal=1000;let trades=[];let deferredPrompt=null;let currentUser=null;let users=[];
+try{currentUser=JSON.parse(localStorage.getItem('apex_current')||'null');users=JSON.parse(localStorage.getItem('apex_users')||'[]');}catch(e){localStorage.clear();}
+function switchAuth(t){document.getElementById('tabLogin').className=t=='login'?'active':'';document.getElementById('tabSignup').className=t=='signup'?'active':'';document.getElementById('loginForm').style.display=t=='login'?'block':'none';document.getElementById('signupForm').style.display=t=='signup'?'block':'none';document.getElementById('authMsg').textContent='';}
 function doSignup(){
- let name=document.getElementById('suName').value.trim(),email=document.getElementById('suEmail').value.trim().toLowerCase(),phone=document.getElementById('suPhone').value.trim(),pass=document.getElementById('suPass').value;
- if(!name||!email||!pass||pass.length<4){document.getElementById('authMsg').textContent='Fill all fields, password min 4';return}
- if(users.find(u=>u.email==email)){document.getElementById('authMsg').textContent='Email exists, Sign In';switchAuth('login');return}
+ let name=document.getElementById('suName').value.trim();let email=document.getElementById('suEmail').value.trim().toLowerCase();let phone=document.getElementById('suPhone').value.trim();let pass=document.getElementById('suPass').value;let msg=document.getElementById('authMsg');
+ if(!name||!email||!pass){msg.textContent='Fill all fields';return}
+ if(pass.length<4){msg.textContent='Password min 4';return}
+ try{users=JSON.parse(localStorage.getItem('apex_users')||'[]');}catch(e){users=[]}
+ if(users.find(u=>u.email==email)){msg.textContent='Email exists, tap Sign In';switchAuth('login');return}
  let u={name,email,phone,pass,bal:1000,trades:[],id:'APX'+Math.floor(100000+Math.random()*900000)};
- users.push(u);localStorage.setItem('apex_users',JSON.stringify(users));currentUser=u;localStorage.setItem('apex_current',JSON.stringify(u));enterApp();
+ users.push(u);localStorage.setItem('apex_users',JSON.stringify(users));localStorage.setItem('apex_current',JSON.stringify(u));currentUser=u;msg.textContent='Success! Opening...';setTimeout(()=>{enterApp();},500);
 }
 function doLogin(){
- let email=document.getElementById('loginEmail').value.trim().toLowerCase(),pass=document.getElementById('loginPass').value;
- if(!email||!pass){document.getElementById('authMsg').textContent='Enter email & password';return}
- let u=users.find(x=>x.email==email&&x.pass==pass);
- if(!u){document.getElementById('authMsg').textContent='Wrong password. Sign Up if new';return}
- currentUser=u;localStorage.setItem('apex_current',JSON.stringify(u));enterApp();
+ let email=document.getElementById('loginEmail').value.trim().toLowerCase();let pass=document.getElementById('loginPass').value;let msg=document.getElementById('authMsg');
+ if(!email||!pass){msg.textContent='Enter email & password';return}
+ try{users=JSON.parse(localStorage.getItem('apex_users')||'[]');}catch(e){users=[]}
+ let u=users.find(x=>x.email==email && x.pass==pass);
+ if(!u){msg.textContent='Wrong password. Sign Up if new';return}
+ localStorage.setItem('apex_current',JSON.stringify(u));currentUser=u;enterApp();
 }
-function logout(){localStorage.removeItem('apex_current');location.reload()}
+function logout(){localStorage.removeItem('apex_current');location.reload();}
 function enterApp(){
  document.getElementById('authScreen').style.display='none';document.getElementById('mainApp').style.display='block';
- document.getElementById('userName').textContent=currentUser.name;document.getElementById('pName').textContent=currentUser.name;document.getElementById('pEmail').textContent=currentUser.email;document.getElementById('pPhone').textContent=currentUser.phone||'-';document.getElementById('accId').textContent=currentUser.id;
- bal=currentUser.bal||1000;trades=currentUser.trades||[];updateBal();renderTrades();
+ document.getElementById('userName').textContent=currentUser.name;document.getElementById('pName').textContent=currentUser.name;document.getElementById('pEmail').textContent=currentUser.email;
+ document.getElementById('accId').textContent=currentUser.id;bal=currentUser.bal||1000;trades=currentUser.trades||[];updateBal();renderTrades();
 }
-if(currentUser){enterApp()}
-let bal=1000,trades=[],price=2045.30,deferredPrompt=null;
-function saveUser(){if(!currentUser)return;currentUser.bal=bal;currentUser.trades=trades;localStorage.setItem('apex_current',JSON.stringify(currentUser));let idx=users.findIndex(u=>u.email==currentUser.email);if(idx>=0){users[idx]=currentUser;localStorage.setItem('apex_users',JSON.stringify(users))}}
-function updateBal(){document.getElementById('bal').textContent='KSh '+bal.toFixed(2);document.querySelectorAll('.balText').forEach(e=>e.textContent='KSh '+bal.toFixed(2));saveUser()}
-function showPage(p){document.getElementById('tradePage').style.display=p=='trade'?'block':'none';document.getElementById('fundsPage').style.display=p=='funds'?'block':'none';document.getElementById('morePage').style.display=p=='more'?'block':'none';document.getElementById('n1').className=p=='trade'?'active':'';document.getElementById('n2').className=p=='funds'?'active':'';document.getElementById('n3').className=p=='more'?'active':''}
-function trade(type){trades.push({id:Date.now(),type,entry:price,time:new Date().toLocaleTimeString()});renderTrades();saveUser();alert(type.toUpperCase()+' LEGIT trade opened at $'+price.toFixed(2));setTimeout(()=>{let profit=(Math.random()*40-12);bal+=profit;updateBal();},2000)}
-function renderTrades(){document.getElementById('tradesCount').textContent=trades.length;document.getElementById('trades').innerHTML=trades.slice().reverse().map(t=>`<div style='padding:8px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;font-size:13px'><span><b style='color:${t.type=='buy'?'#22c55e':'#ef4444'}'>${t.type.toUpperCase()}</b> @ $${t.entry.toFixed(2)}</span><span>${t.time}</span></div>`).join('')||'<small style=color:#94a3b8>No trades yet</small>'}
-function deposit(){let a=parseFloat(document.getElementById('depAmt').value);if(!a)return alert('Enter amount');bal+=a;updateBal();document.getElementById('depAmt').value='';alert('Deposit KSh '+a+' success!')}
-function shareWA(){let txt=encodeURIComponent('🔥 APEX TRADE Legit App 🔥\n✓ Real Sign Up with Email\n✓ KSh 1,000 Demo\n👉 https://toxcykim20-afk.github.io/APEX-TRADE/');window.open('https://wa.me/?text='+txt,'_blank')}
-function installApp(){if(deferredPrompt)deferredPrompt.prompt();else alert('Chrome ⋮ → Add to Home screen → Install')}
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
-setInterval(()=>{price+=(Math.random()-0.5)*1.2;let el=document.getElementById('price');if(el)el.textContent='$'+price.toFixed(2)},1300);
-let chart=document.getElementById('chart');if(chart){for(let i=0;i<28;i++){let b=document.createElement('div');b.style.flex='1';b.style.background='#22c55e';b.style.height=(30+Math.random()*60)+'%';b.style.borderRadius='2px';chart.appendChild(b)}setInterval(()=>{if(chart.children.length>0)chart.children[0].remove();let b=document.createElement('div');b.style.flex='1';b.style.background='#22c55e';b.style.height=(20+Math.random()*70)+'%';b.style.borderRadius='2px';chart.appendChild(b)},700)}
+function saveUser(){if(!currentUser)return;currentUser.bal=bal;currentUser.trades=trades;localStorage.setItem('apex_current',JSON.stringify(currentUser));let idx=users.findIndex(u=>u.email==currentUser.email);if(idx>=0){users[idx]=currentUser;localStorage.setItem('apex_users',JSON.stringify(users));}}
+function updateBal(){let b=document.getElementById('bal');if(b)b.textContent='KSh '+bal.toFixed(2);document.querySelectorAll('.balText').forEach(e=>e.textContent='KSh '+bal.toFixed(2));saveUser();}
+function showPage(p){document.getElementById('tradePage').style.display=p=='trade'?'block':'none';document.getElementById('fundsPage').style.display=p=='funds'?'block':'none';document.getElementById('morePage').style.display=p=='more'?'block':'none';document.getElementById('n1').className=p=='trade'?'active':'';document.getElementById('n2').className=p=='funds'?'active':'';document.getElementById('n3').className=p=='more'?'active':'';}
+function trade(type){trades.push({id:Date.now(),type,entry:price,time:new Date().toLocaleTimeString()});renderTrades();saveUser();alert(type.toUpperCase()+' trade opened');setTimeout(()=>{let profit=(Math.random()*40-12);bal+=profit;updateBal();},2000);}
+function renderTrades(){let c=document.getElementById('tradesCount');if(c)c.textContent=trades.length;let el=document.getElementById('trades');if(el)el.innerHTML=trades.slice().reverse().map(t=>`<div style='padding:8px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;font-size:13px'><span><b style='color:${t.type=='buy'?'#22c55e':'#ef4444'}'>${t.type.toUpperCase()}</b> @ $${t.entry.toFixed(2)}</span><span>${t.time}</span></div>`).join('')||'<small style=color:#94a3b8>No trades yet</small>';}
+function deposit(){let a=parseFloat(document.getElementById('depAmt').value);if(!a)return alert('Enter amount');bal+=a;updateBal();document.getElementById('depAmt').value='';alert('Deposit KSh '+a+' success!');}
+function shareWA(){let txt=encodeURIComponent('APEX TRADE Legit App 👉 https://toxcykim20-afk.github.io/APEX-TRADE/');window.open('https://wa.me/?text='+txt,'_blank');}
+function installApp(){if(deferredPrompt)deferredPrompt.prompt();else alert('Chrome ⋮ → Add to Home screen → Install');}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+setInterval(()=>{price+=(Math.random()-0.5)*1.2;let el=document.getElementById('price');if(el)el.textContent='$'+price.toFixed(2);},1300);
+if(currentUser){enterApp();}
+let chart=document.getElementById('chart');if(chart){for(let i=0;i<28;i++){let b=document.createElement('div');b.style.flex='1';b.style.background='#22c55e';b.style.height=(30+Math.random()*60)+'%';b.style.borderRadius='2px';chart.appendChild(b);}setInterval(()=>{if(chart.children.length>0)chart.children[0].remove();let b=document.createElement('div');b.style.flex='1';b.style.background='#22c55e';b.style.height=(20+Math.random()*70)+'%';b.style.borderRadius='2px';chart.appendChild(b);},700);}
 </script>
 </body>
 </html>
